@@ -1,411 +1,414 @@
-<!DOCTYPE html>
-<html lang="zh-TW">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SportFlow | 運動管理系統後台</title>
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Lucide Icons -->
-    <script src="https://unpkg.com/lucide@latest"></script>
-    <style>
-        /* LINE OA 品牌色 */
-        :root {
-            --line-green: #06C755;
-            --line-dark: #2c3e50;
-            --line-hover: #34495e;
-            --line-active: #1a252f;
-        }
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; }
-        .sidebar-active {
-            background-color: var(--line-active);
-            color: var(--line-green);
-            border-left: 4px solid var(--line-green);
-        }
-        .tab-content { display: none; }
-        .tab-content.active { display: block; }
-        /* 捲軸美化 */
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-track { background: #f1f1f1; }
-        ::-webkit-scrollbar-thumb { background: #ccc; border-radius: 10px; }
-    </style>
-</head>
-<body class="bg-gray-100 text-gray-800 h-screen overflow-hidden flex">
+import React, { useState, useEffect } from 'react';
+import { 
+  LayoutDashboard, 
+  Users, 
+  CalendarDays, 
+  CheckSquare, 
+  Settings, 
+  Bell, 
+  LogOut, 
+  Search, 
+  Plus,
+  ChevronRight,
+  MoreVertical,
+  UserCheck,
+  Smartphone,
+  Database
+} from 'lucide-react';
 
-    <!-- 左側導航欄 (Sidebar) -->
-    <aside id="sidebar" class="w-64 bg-[#2c3e50] text-white transition-all duration-300 flex flex-col h-full shrink-0">
-        <div class="p-6 flex items-center gap-3 border-b border-gray-700">
-            <div class="w-8 h-8 bg-[#06C755] rounded-lg flex items-center justify-center font-bold text-white shadow-lg">S</div>
-            <span class="sidebar-text font-bold text-lg tracking-wider overflow-hidden whitespace-nowrap">SportFlow</span>
+/**
+ * 運動課程管理系統 - 管理者後台 (LINE OA 風格)
+ * 特色：模組化結構、響應式佈局、仿 LINE 介面設計
+ */
+
+const App = () => {
+  const [activeTab, setActiveTab] = useState('dashboard');
+  const [isSidebarOpen, setSidebarOpen] = useState(true);
+
+  // 模擬數據
+  const stats = [
+    { label: '本月報名人數', value: '1,284', change: '+12%', icon: Users },
+    { label: '今日預約課程', value: '12', change: '正常', icon: CalendarDays },
+    { label: '點名核銷率', value: '94%', change: '+2%', icon: CheckSquare },
+  ];
+
+  const renderContent = () => {
+    switch (activeTab) {
+      case 'dashboard':
+        return <DashboardView stats={stats} />;
+      case 'members':
+        return <MemberManagement />;
+      case 'courses':
+        return <CourseManagement />;
+      case 'checkin':
+        return <AttendanceCheckIn />;
+      case 'settings':
+        return <SystemSettings />;
+      default:
+        return <DashboardView stats={stats} />;
+    }
+  };
+
+  return (
+    <div className="flex h-screen bg-gray-100 text-gray-800 font-sans">
+      {/* 左側導航欄 (Sidebar) - 仿 LINE OA */}
+      <aside className={`${isSidebarOpen ? 'w-64' : 'w-20'} bg-[#2c3e50] text-white transition-all duration-300 flex flex-col`}>
+        <div className="p-6 flex items-center gap-3 border-b border-gray-700">
+          <div className="w-8 h-8 bg-[#06C755] rounded-lg flex items-center justify-center font-bold text-white">S</div>
+          {isSidebarOpen && <span className="font-bold text-lg tracking-wider">運動管理系統</span>}
         </div>
 
-        <nav class="flex-1 mt-4 overflow-y-auto">
-            <a href="javascript:void(0)" onclick="switchTab('dashboard')" class="nav-item sidebar-active flex items-center gap-4 px-6 py-4 transition-all hover:bg-[#34495e]" data-tab="dashboard">
-                <i data-lucide="layout-dashboard" class="w-5 h-5"></i>
-                <span class="sidebar-text font-medium whitespace-nowrap">數據概覽</span>
-            </a>
-            <a href="javascript:void(0)" onclick="switchTab('members')" class="nav-item flex items-center gap-4 px-6 py-4 transition-all text-gray-400 hover:bg-[#34495e] hover:text-white" data-tab="members">
-                <i data-lucide="users" class="w-5 h-5"></i>
-                <span class="sidebar-text font-medium whitespace-nowrap">會員名冊管理</span>
-            </a>
-            <a href="javascript:void(0)" onclick="switchTab('courses')" class="nav-item flex items-center gap-4 px-6 py-4 transition-all text-gray-400 hover:bg-[#34495e] hover:text-white" data-tab="courses">
-                <i data-lucide="calendar-days" class="w-5 h-5"></i>
-                <span class="sidebar-text font-medium whitespace-nowrap">課程與商品建置</span>
-            </a>
-            <a href="javascript:void(0)" onclick="switchTab('checkin')" class="nav-item flex items-center gap-4 px-6 py-4 transition-all text-gray-400 hover:bg-[#34495e] hover:text-white" data-tab="checkin">
-                <i data-lucide="check-square" class="w-5 h-5"></i>
-                <span class="sidebar-text font-medium whitespace-nowrap">當日點名核銷</span>
-            </a>
-            <div class="border-t border-gray-700 my-2"></div>
-            <a href="javascript:void(0)" onclick="switchTab('settings')" class="nav-item flex items-center gap-4 px-6 py-4 transition-all text-gray-400 hover:bg-[#34495e] hover:text-white" data-tab="settings">
-                <i data-lucide="settings" class="w-5 h-5"></i>
-                <span class="sidebar-text font-medium whitespace-nowrap">系統參數區</span>
-            </a>
+        <nav className="flex-1 mt-4">
+          <NavItem 
+            icon={<LayoutDashboard size={20} />} 
+            label="儀表板首頁" 
+            active={activeTab === 'dashboard'} 
+            onClick={() => setActiveTab('dashboard')} 
+            collapsed={!isSidebarOpen}
+          />
+          <NavItem 
+            icon={<Users size={20} />} 
+            label="會員名冊管理" 
+            active={activeTab === 'members'} 
+            onClick={() => setActiveTab('members')} 
+            collapsed={!isSidebarOpen}
+          />
+          <NavItem 
+            icon={<CalendarDays size={20} />} 
+            label="課程與商品建置" 
+            active={activeTab === 'courses'} 
+            onClick={() => setActiveTab('courses')} 
+            collapsed={!isSidebarOpen}
+          />
+          <NavItem 
+            icon={<CheckSquare size={20} />} 
+            label="當日點名核銷" 
+            active={activeTab === 'checkin'} 
+            onClick={() => setActiveTab('checkin')} 
+            collapsed={!isSidebarOpen}
+          />
+          <div className="border-t border-gray-700 my-2"></div>
+          <NavItem 
+            icon={<Settings size={20} />} 
+            label="系統參數區" 
+            active={activeTab === 'settings'} 
+            onClick={() => setActiveTab('settings')} 
+            collapsed={!isSidebarOpen}
+          />
         </nav>
 
-        <div class="p-4 border-t border-gray-700">
-            <button class="flex items-center gap-3 text-gray-400 hover:text-white transition-colors w-full px-4 py-2">
-                <i data-lucide="log-out" class="w-5 h-5"></i>
-                <span class="sidebar-text whitespace-nowrap">登出系統</span>
-            </button>
+        <div className="p-4 border-t border-gray-700">
+          <button className="flex items-center gap-3 text-gray-400 hover:text-white transition-colors w-full px-4 py-2">
+            <LogOut size={20} />
+            {isSidebarOpen && <span>登出系統</span>}
+          </button>
         </div>
-    </aside>
+      </aside>
 
-    <!-- 右側主要區域 -->
-    <div class="flex-1 flex flex-col min-w-0">
-        <!-- 頂部 Header -->
-        <header class="h-16 bg-white shadow-sm flex items-center justify-between px-4 md:px-8 shrink-0">
-            <div class="flex items-center gap-4">
-                <button onclick="toggleSidebar()" class="p-2 hover:bg-gray-100 rounded-md">
-                    <i data-lucide="menu" class="w-6 h-6 text-gray-600"></i>
-                </button>
-                <h2 id="current-tab-title" class="text-lg md:text-xl font-semibold text-gray-700">數據概覽</h2>
+      {/* 右側主要區域 */}
+      <main className="flex-1 flex flex-col overflow-hidden">
+        {/* 頂部 Header */}
+        <header className="h-16 bg-white shadow-sm flex items-center justify-between px-8">
+          <div className="flex items-center gap-4">
+            <button 
+              onClick={() => setSidebarOpen(!isSidebarOpen)}
+              className="p-2 hover:bg-gray-100 rounded-md"
+            >
+              <div className="w-5 h-0.5 bg-gray-600 mb-1"></div>
+              <div className="w-5 h-0.5 bg-gray-600 mb-1"></div>
+              <div className="w-5 h-0.5 bg-gray-600"></div>
+            </button>
+            <h2 className="text-xl font-semibold text-gray-700 capitalize">
+              {activeTab === 'dashboard' ? '數據概覽' : 
+               activeTab === 'members' ? '會員名冊' : 
+               activeTab === 'courses' ? '課程管理' : 
+               activeTab === 'checkin' ? '核銷作業' : '系統設置'}
+            </h2>
+          </div>
+          <div className="flex items-center gap-4">
+            <button className="relative p-2 text-gray-500 hover:bg-gray-100 rounded-full">
+              <Bell size={20} />
+              <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></span>
+            </button>
+            <div className="flex items-center gap-2 pl-4 border-l">
+              <div className="text-right">
+                <p className="text-sm font-medium">Tony 管理員</p>
+                <p className="text-xs text-gray-400">總管理權限</p>
+              </div>
+              <div className="w-10 h-10 bg-gray-200 rounded-full overflow-hidden border border-gray-300">
+                <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Tony" alt="avatar" />
+              </div>
             </div>
-            <div class="flex items-center gap-2 md:gap-4">
-                <button class="relative p-2 text-gray-500 hover:bg-gray-100 rounded-full">
-                    <i data-lucide="bell" class="w-5 h-5"></i>
-                    <span class="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></span>
-                </button>
-                <div class="flex items-center gap-2 pl-2 md:pl-4 border-l">
-                    <div class="text-right hidden sm:block">
-                        <p class="text-sm font-medium">Tony 管理員</p>
-                        <p class="text-xs text-gray-400">總管理權限</p>
-                    </div>
-                    <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Tony" alt="avatar" class="w-8 h-8 md:w-10 md:h-10 bg-gray-200 rounded-full border border-gray-300">
-                </div>
-            </div>
+          </div>
         </header>
 
-        <!-- 內容滾動區 -->
-        <main class="flex-1 overflow-y-auto p-4 md:p-8">
-            
-            <!-- 模組：儀表板 -->
-            <div id="dashboard" class="tab-content active space-y-8">
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                    <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex items-center gap-4">
-                        <div class="p-4 bg-green-50 text-[#06C755] rounded-xl"><i data-lucide="users"></i></div>
-                        <div>
-                            <p class="text-sm text-gray-500">本月報名人數</p>
-                            <h3 class="text-2xl font-bold">1,284 <span class="text-xs text-green-600 ml-1">+12%</span></h3>
-                        </div>
-                    </div>
-                    <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex items-center gap-4">
-                        <div class="p-4 bg-blue-50 text-blue-500 rounded-xl"><i data-lucide="calendar"></i></div>
-                        <div>
-                            <p class="text-sm text-gray-500">今日預約課程</p>
-                            <h3 class="text-2xl font-bold">12 <span class="text-xs text-blue-600 ml-1">正常</span></h3>
-                        </div>
-                    </div>
-                    <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex items-center gap-4">
-                        <div class="p-4 bg-purple-50 text-purple-500 rounded-xl"><i data-lucide="check-circle-2"></i></div>
-                        <div>
-                            <p class="text-sm text-gray-500">點名核銷率</p>
-                            <h3 class="text-2xl font-bold">94% <span class="text-xs text-green-600 ml-1">+2%</span></h3>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-                    <div class="flex justify-between items-center mb-6">
-                        <h3 class="font-bold text-lg">最近報名動態</h3>
-                        <button class="text-[#06C755] text-sm font-medium hover:underline">查看全部</button>
-                    </div>
-                    <div class="space-y-4">
-                        <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                            <div class="flex items-center gap-4 text-sm md:text-base">
-                                <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center text-green-700 font-bold shrink-0">W</div>
-                                <div>
-                                    <p class="font-medium">王小明 預約了「基礎羽球班」</p>
-                                    <p class="text-xs text-gray-400">10 分鐘前 · LINE 預約</p>
-                                </div>
-                            </div>
-                            <span class="px-3 py-1 bg-green-100 text-green-700 text-[10px] md:text-xs rounded-full shrink-0">付款完成</span>
-                        </div>
-                        <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                            <div class="flex items-center gap-4 text-sm md:text-base">
-                                <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center text-blue-700 font-bold shrink-0">L</div>
-                                <div>
-                                    <p class="font-medium">李大同 預約了「空中瑜珈」</p>
-                                    <p class="text-xs text-gray-400">25 分鐘前 · LINE 預約</p>
-                                </div>
-                            </div>
-                            <span class="px-3 py-1 bg-blue-100 text-blue-700 text-[10px] md:text-xs rounded-full shrink-0">現場付款</span>
-                        </div>
-                    </div>
-                </div>
+        {/* 內容區塊 */}
+        <section className="flex-1 overflow-y-auto p-8">
+          {renderContent()}
+        </section>
+      </main>
+    </div>
+  );
+};
+
+// --- 子組件：導航按鈕 ---
+const NavItem = ({ icon, label, active, onClick, collapsed }) => (
+  <button 
+    onClick={onClick}
+    className={`
+      flex items-center gap-4 w-full px-6 py-4 transition-all
+      ${active ? 'bg-[#1a252f] text-[#06C755] border-l-4 border-[#06C755]' : 'text-gray-400 hover:bg-[#34495e] hover:text-white'}
+    `}
+  >
+    {icon}
+    {!collapsed && <span className="font-medium whitespace-nowrap">{label}</span>}
+  </button>
+);
+
+// --- 子組件：儀表板視圖 ---
+const DashboardView = ({ stats }) => (
+  <div className="space-y-8">
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      {stats.map((item, idx) => (
+        <div key={idx} className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex items-center gap-4">
+          <div className="p-4 bg-green-50 text-[#06C755] rounded-xl">
+            <item.icon size={24} />
+          </div>
+          <div>
+            <p className="text-sm text-gray-500">{item.label}</p>
+            <div className="flex items-baseline gap-2">
+              <h3 className="text-2xl font-bold">{item.value}</h3>
+              <span className="text-xs text-green-600 font-medium">{item.change}</span>
             </div>
-
-            <!-- 模組：會員名冊 -->
-            <div id="members" class="tab-content space-y-6">
-                <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-                    <div class="p-6 border-b flex flex-col md:flex-row md:items-center justify-between gap-4">
-                        <div class="relative w-full md:w-80">
-                            <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4"></i>
-                            <input type="text" placeholder="搜尋會員姓名或手機..." class="w-full pl-10 pr-4 py-2 bg-gray-50 border rounded-lg focus:ring-2 focus:ring-[#06C755] outline-none text-sm">
-                        </div>
-                        <div class="flex gap-2">
-                            <button class="flex items-center justify-center gap-2 px-4 py-2 border rounded-lg hover:bg-gray-50 text-sm flex-1 md:flex-none">
-                                <i data-lucide="download" class="w-4 h-4"></i> 匯出
-                            </button>
-                            <button class="flex items-center justify-center gap-2 px-4 py-2 bg-[#06C755] text-white rounded-lg hover:bg-[#05b54c] text-sm flex-1 md:flex-none">
-                                <i data-lucide="plus" class="w-4 h-4"></i> 新增會員
-                            </button>
-                        </div>
-                    </div>
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-left text-sm min-w-[600px]">
-                            <thead class="bg-gray-50 border-b">
-                                <tr>
-                                    <th class="px-6 py-4 font-semibold text-gray-600">會員姓名</th>
-                                    <th class="px-6 py-4 font-semibold text-gray-600">手機號碼</th>
-                                    <th class="px-6 py-4 font-semibold text-gray-600">累積點數</th>
-                                    <th class="px-6 py-4 font-semibold text-gray-600">最近參加</th>
-                                    <th class="px-6 py-4 font-semibold text-gray-600">操作</th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y">
-                                <tr class="hover:bg-gray-50 transition-colors">
-                                    <td class="px-6 py-4 font-medium">王小明</td>
-                                    <td class="px-6 py-4">0912-345-678</td>
-                                    <td class="px-6 py-4">120 pt</td>
-                                    <td class="px-6 py-4 text-gray-500">2025/12/28 10:00</td>
-                                    <td class="px-6 py-4"><button class="text-blue-500 hover:underline">詳情</button></td>
-                                </tr>
-                                <tr class="hover:bg-gray-50 transition-colors">
-                                    <td class="px-6 py-4 font-medium">李大同</td>
-                                    <td class="px-6 py-4">0988-123-456</td>
-                                    <td class="px-6 py-4">45 pt</td>
-                                    <td class="px-6 py-4 text-gray-500">2025/12/25 19:00</td>
-                                    <td class="px-6 py-4"><button class="text-blue-500 hover:underline">詳情</button></td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
+          </div>
+        </div>
+      ))}
+    </div>
+    
+    <div className="bg-white p-8 rounded-xl shadow-sm border border-gray-100">
+      <div className="flex justify-between items-center mb-6">
+        <h3 className="font-bold text-lg">最近報名動態</h3>
+        <button className="text-[#06C755] text-sm font-medium hover:underline">查看全部</button>
+      </div>
+      <div className="space-y-4">
+        {[1, 2, 3].map(i => (
+          <div key={i} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+            <div className="flex items-center gap-4">
+              <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center text-green-700 font-bold">W</div>
+              <div>
+                <p className="font-medium">王小明 預約了「進階羽球課程」</p>
+                <p className="text-xs text-gray-400">10 分鐘前 · LINE 預約</p>
+              </div>
             </div>
+            <span className="px-3 py-1 bg-green-100 text-green-700 text-xs rounded-full">付款完成</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  </div>
+);
 
-            <!-- 模組：課程建置 (重點：手機版並排) -->
-            <div id="courses" class="tab-content space-y-6">
-                <div class="flex justify-between items-center">
-                    <p class="text-sm text-gray-500"><i data-lucide="smartphone" class="inline w-4 h-4 mr-1"></i> 手機版自動雙排顯示</p>
-                    <button class="bg-[#06C755] text-white px-4 py-2 rounded-lg flex items-center gap-2 text-sm shadow-sm">
-                        <i data-lucide="plus" class="w-4 h-4"></i> 新增課程
-                    </button>
-                </div>
-                <!-- 網格佈局：cols-2 確保手機版並排 -->
-                <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-6">
-                    <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden flex flex-col hover:shadow-md transition-shadow">
-                        <div class="h-20 bg-blue-500 flex items-center justify-center text-white font-bold p-2 text-center text-sm">基礎羽球班</div>
-                        <div class="p-3 flex-1 flex flex-col justify-between space-y-2 text-xs md:text-sm">
-                            <div>
-                                <p class="text-gray-500 font-medium italic">每週六 10:00</p>
-                                <p class="font-bold text-gray-700 mt-1">$500 / 堂</p>
-                            </div>
-                            <div class="flex items-center justify-between pt-2 border-t">
-                                <span class="px-2 py-0.5 rounded-full bg-green-100 text-green-600 text-[10px]">剩 2 名</span>
-                                <i data-lucide="settings" class="w-3 h-3 text-gray-400 cursor-pointer"></i>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden flex flex-col hover:shadow-md transition-shadow">
-                        <div class="h-20 bg-purple-500 flex items-center justify-center text-white font-bold p-2 text-center text-sm">空中瑜珈</div>
-                        <div class="p-3 flex-1 flex flex-col justify-between space-y-2 text-xs md:text-sm">
-                            <div>
-                                <p class="text-gray-500 font-medium italic">每週三 19:00</p>
-                                <p class="font-bold text-gray-700 mt-1">$600 / 堂</p>
-                            </div>
-                            <div class="flex items-center justify-between pt-2 border-t">
-                                <span class="px-2 py-0.5 rounded-full bg-red-100 text-red-600 text-[10px]">已額滿</span>
-                                <i data-lucide="settings" class="w-3 h-3 text-gray-400 cursor-pointer"></i>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden flex flex-col hover:shadow-md transition-shadow">
-                        <div class="h-20 bg-orange-500 flex items-center justify-center text-white font-bold p-2 text-center text-sm">籃球特訓營</div>
-                        <div class="p-3 flex-1 flex flex-col justify-between space-y-2 text-xs md:text-sm">
-                            <div>
-                                <p class="text-gray-500 font-medium italic">每週五 18:30</p>
-                                <p class="font-bold text-gray-700 mt-1">$1,200 / 堂</p>
-                            </div>
-                            <div class="flex items-center justify-between pt-2 border-t">
-                                <span class="px-2 py-0.5 rounded-full bg-green-100 text-green-600 text-[10px]">剩 5 名</span>
-                                <i data-lucide="settings" class="w-3 h-3 text-gray-400 cursor-pointer"></i>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+// --- 子組件：會員管理 ---
+const MemberManagement = () => (
+  <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+    <div className="p-6 border-b flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="relative w-full md:w-80">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+        <input 
+          type="text" 
+          placeholder="搜尋會員姓名或手機..." 
+          className="w-full pl-10 pr-4 py-2 bg-gray-50 border rounded-lg focus:ring-2 focus:ring-[#06C755] outline-none"
+        />
+      </div>
+      <div className="flex gap-2">
+        <button className="flex items-center gap-2 px-4 py-2 border rounded-lg hover:bg-gray-50">
+          <Database size={18} />
+          匯出 Excel
+        </button>
+        <button className="flex items-center gap-2 px-4 py-2 bg-[#06C755] text-white rounded-lg hover:bg-[#05b54c]">
+          <Plus size={18} />
+          新增會員
+        </button>
+      </div>
+    </div>
+    <div className="overflow-x-auto">
+      <table className="w-full text-left text-sm">
+        <thead className="bg-gray-50 border-b">
+          <tr>
+            <th className="px-6 py-4 font-semibold">會員姓名</th>
+            <th className="px-6 py-4 font-semibold">LINE ID</th>
+            <th className="px-6 py-4 font-semibold">手機</th>
+            <th className="px-6 py-4 font-semibold">累積點數</th>
+            <th className="px-6 py-4 font-semibold">報名紀錄</th>
+            <th className="px-6 py-4 font-semibold">操作</th>
+          </tr>
+        </thead>
+        <tbody className="divide-y">
+          {[
+            { name: '王小明', line: 'user_001', phone: '0912-345-678', points: 120, records: 5 },
+            { name: '李大同', line: 'user_082', phone: '0988-123-456', points: 45, records: 2 },
+            { name: '張小雅', line: 'user_015', phone: '0977-666-333', points: 300, records: 12 },
+          ].map((m, idx) => (
+            <tr key={idx} className="hover:bg-gray-50">
+              <td className="px-6 py-4 font-medium">{m.name}</td>
+              <td className="px-6 py-4 text-gray-500 font-mono text-xs">{m.line}</td>
+              <td className="px-6 py-4">{m.phone}</td>
+              <td className="px-6 py-4">{m.points} pt</td>
+              <td className="px-6 py-4">
+                <button className="text-[#06C755] hover:underline flex items-center gap-1">
+                  查看 {m.records} 筆記錄 <ChevronRight size={14} />
+                </button>
+              </td>
+              <td className="px-6 py-4">
+                <button className="p-2 hover:bg-gray-200 rounded-lg"><MoreVertical size={16} /></button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  </div>
+);
 
-            <!-- 模組：點名核銷 -->
-            <div id="checkin" class="tab-content space-y-6">
-                <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 flex flex-col md:flex-row justify-between items-center gap-4">
-                    <div>
-                        <h3 class="font-bold text-lg">報到清單 (2025/12/30)</h3>
-                        <p class="text-sm text-gray-400">請選取課程進行核銷作業</p>
-                    </div>
-                    <select class="w-full md:w-auto px-4 py-2 bg-gray-50 border rounded-lg text-sm outline-none">
-                        <option>基礎羽球班 (10:00)</option>
-                        <option>籃球特訓營 (18:30)</option>
-                    </select>
-                </div>
-                <div class="bg-white rounded-xl shadow-sm border border-gray-100 divide-y">
-                    <div class="p-4 md:p-6 flex items-center justify-between hover:bg-gray-50 transition-colors">
-                        <div class="flex items-center gap-4 min-w-0">
-                            <div class="w-12 h-12 rounded-xl bg-gray-200 flex items-center justify-center font-bold text-gray-600 shrink-0">王</div>
-                            <div class="truncate">
-                                <p class="font-bold">王小明</p>
-                                <p class="text-xs text-gray-400 truncate">報名序號：#BK8821</p>
-                            </div>
-                        </div>
-                        <div class="flex gap-2">
-                            <button class="bg-[#06C755] text-white px-3 md:px-5 py-2 rounded-lg text-xs md:text-sm font-medium hover:bg-[#05b54c]">報到</button>
-                            <button class="border border-red-200 text-red-500 px-3 md:px-5 py-2 rounded-lg text-xs md:text-sm font-medium hover:bg-red-50">未到</button>
-                        </div>
-                    </div>
-                    <div class="p-4 md:p-6 flex items-center justify-between hover:bg-gray-50 transition-colors">
-                        <div class="flex items-center gap-4 min-w-0">
-                            <div class="w-12 h-12 rounded-xl bg-green-500 flex items-center justify-center font-bold text-white shrink-0">李</div>
-                            <div class="truncate">
-                                <p class="font-bold">李大同</p>
-                                <p class="text-xs text-gray-400 truncate">報名序號：#BK8822</p>
-                            </div>
-                        </div>
-                        <span class="text-green-600 font-bold text-xs md:text-sm px-4">✓ 已報到</span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 模組：系統參數 -->
-            <div id="settings" class="tab-content">
-                <div class="max-w-2xl bg-white rounded-xl shadow-sm border border-gray-100 p-6 md:p-8 space-y-8">
-                    <section>
-                        <h3 class="font-bold text-lg mb-4 flex items-center gap-2">
-                            <i data-lucide="database" class="w-5 h-5 text-blue-500"></i> 資料庫連接設定 (GAS)
-                        </h3>
-                        <div class="space-y-4">
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Google Sheet ID</label>
-                                <input type="text" class="w-full p-2 bg-gray-50 border rounded-lg font-mono text-xs md:text-sm" value="1x2y3z4w5v6u7t8s9r0q_demo_id">
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">GAS Web App URL</label>
-                                <input type="text" class="w-full p-2 bg-gray-50 border rounded-lg font-mono text-xs md:text-sm" placeholder="https://script.google.com/macros/s/...">
-                            </div>
-                        </div>
-                    </section>
-                    
-                    <section>
-                        <h3 class="font-bold text-lg mb-4 flex items-center gap-2 text-yellow-600">
-                            <i data-lucide="shield-check" class="w-5 h-5"></i> 自動備份與安全
-                        </h3>
-                        <div class="flex items-center justify-between p-4 bg-gray-50 rounded-xl border-l-4 border-yellow-400">
-                            <div>
-                                <p class="font-medium text-sm">每日自動備份</p>
-                                <p class="text-xs text-gray-400 italic">系統將於每日凌晨 03:00 複製副本至指定資料夾</p>
-                            </div>
-                            <div class="w-12 h-6 bg-[#06C755] rounded-full relative cursor-pointer">
-                                <div class="absolute right-1 top-1 w-4 h-4 bg-white rounded-full"></div>
-                            </div>
-                        </div>
-                    </section>
-
-                    <button class="w-full py-4 bg-[#2c3e50] text-white rounded-xl font-bold hover:bg-[#1a252f] transition-all shadow-lg active:scale-[0.98]">
-                        儲存並同步系統設定
-                    </button>
-                </div>
-            </div>
-
-        </main>
+// --- 子組件：課程管理 (解決並排問題) ---
+const CourseManagement = () => (
+  <div className="space-y-6">
+    <div className="flex justify-between items-center">
+      <div className="flex items-center gap-2 text-sm text-gray-500">
+        <Smartphone size={16} />
+        <span>預覽手機顯示模式：已強制開啟兩排網格佈局</span>
+      </div>
+      <button className="bg-[#06C755] text-white px-4 py-2 rounded-lg flex items-center gap-2">
+        <Plus size={18} /> 新增活動
+      </button>
     </div>
 
-    <!-- JavaScript 邏輯 -->
-    <script>
-        // 初始化 Lucide 圖標
-        lucide.createIcons();
+    {/* 核心網格佈局：解決你提到的並排困擾 */}
+    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+      {[
+        { title: '基礎羽球班', time: '每週六 10:00', price: '500', slot: '剩 2 名', color: 'bg-blue-500' },
+        { title: '親子體適能', time: '每週日 09:00', price: '800', slot: '剩 5 名', color: 'bg-green-500' },
+        { title: '空中瑜珈', time: '每週三 19:00', price: '600', slot: '已額滿', color: 'bg-purple-500' },
+        { title: '籃球特訓營', time: '每週五 18:30', price: '1200', slot: '剩 1 名', color: 'bg-orange-500' },
+      ].map((course, idx) => (
+        <div key={idx} className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden flex flex-col">
+          <div className={`h-24 ${course.color} flex items-center justify-center text-white font-bold p-4 text-center`}>
+            {course.title}
+          </div>
+          <div className="p-4 flex-1 flex flex-col justify-between space-y-2">
+            <div>
+              <p className="text-xs text-gray-500 font-medium">{course.time}</p>
+              <p className="text-sm font-bold text-gray-700 mt-1">${course.price} / 堂</p>
+            </div>
+            <div className="flex items-center justify-between pt-2 border-t">
+              <span className={`text-[10px] px-2 py-0.5 rounded-full ${course.slot === '已額滿' ? 'bg-red-100 text-red-600' : 'bg-green-100 text-green-600'}`}>
+                {course.slot}
+              </span>
+              <button className="text-gray-400 hover:text-[#06C755]"><Settings size={14} /></button>
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  </div>
+);
 
-        // 切換側邊欄 (收合功能)
-        function toggleSidebar() {
-            const sidebar = document.getElementById('sidebar');
-            const texts = document.querySelectorAll('.sidebar-text');
-            
-            if (sidebar.classList.contains('w-64')) {
-                sidebar.classList.replace('w-64', 'w-20');
-                texts.forEach(t => t.style.display = 'none');
-            } else {
-                sidebar.classList.replace('w-20', 'w-64');
-                texts.forEach(t => t.style.display = 'block');
-            }
-        }
+// --- 子組件：點名核銷 ---
+const AttendanceCheckIn = () => (
+  <div className="bg-white rounded-xl shadow-sm border border-gray-100">
+    <div className="p-6 border-b flex items-center justify-between">
+      <div>
+        <h3 className="font-bold text-lg">當日活動報到清單</h3>
+        <p className="text-sm text-gray-400">日期：2025/12/30 (二)</p>
+      </div>
+      <select className="px-4 py-2 bg-gray-50 border rounded-lg text-sm outline-none">
+        <option>所有活動清單</option>
+        <option>基礎羽球班 (10:00)</option>
+        <option>籃球特訓營 (18:30)</option>
+      </select>
+    </div>
+    <div className="divide-y">
+      {[
+        { name: '王小明', course: '基礎羽球班', time: '10:00', status: 'pending' },
+        { name: '李大同', course: '基礎羽球班', time: '10:00', status: 'checked' },
+        { name: '張小雅', course: '基礎羽球班', time: '10:00', status: 'pending' },
+        { name: '陳阿強', course: '基礎羽球班', time: '10:00', status: 'absent' },
+      ].map((user, idx) => (
+        <div key={idx} className="p-6 flex items-center justify-between hover:bg-gray-50">
+          <div className="flex items-center gap-4">
+            <div className={`w-12 h-12 rounded-xl flex items-center justify-center font-bold text-white ${
+              user.status === 'checked' ? 'bg-green-500' : user.status === 'absent' ? 'bg-red-500' : 'bg-gray-300'
+            }`}>
+              {user.name.charAt(0)}
+            </div>
+            <div>
+              <p className="font-bold">{user.name}</p>
+              <p className="text-xs text-gray-400">{user.course} · {user.time}</p>
+            </div>
+          </div>
+          <div className="flex gap-2">
+            {user.status === 'pending' ? (
+              <>
+                <button className="flex items-center gap-2 px-4 py-2 bg-[#06C755] text-white rounded-lg hover:bg-[#05b54c] font-medium text-sm">
+                  <UserCheck size={18} /> 按下出席報到
+                </button>
+                <button className="px-4 py-2 border border-red-200 text-red-500 rounded-lg hover:bg-red-50 text-sm">
+                  標記未到
+                </button>
+              </>
+            ) : (
+              <span className={`px-4 py-2 rounded-lg text-sm font-bold ${
+                user.status === 'checked' ? 'bg-green-50 text-green-600' : 'bg-red-50 text-red-600'
+              }`}>
+                {user.status === 'checked' ? '✓ 已正式報到' : '✕ 缺席 (已記錄)'}
+              </span>
+            )}
+          </div>
+        </div>
+      ))}
+    </div>
+  </div>
+);
 
-        // 切換分頁模組
-        function switchTab(tabId) {
-            // 隱藏所有分頁
-            const contents = document.querySelectorAll('.tab-content');
-            contents.forEach(c => c.classList.remove('active'));
-            
-            // 顯示選定分頁
-            const activeContent = document.getElementById(tabId);
-            if (activeContent) activeContent.classList.add('active');
+// --- 子組件：系統參數 ---
+const SystemSettings = () => (
+  <div className="max-w-2xl bg-white rounded-xl shadow-sm border border-gray-100 p-8 space-y-8">
+    <section>
+      <h3 className="font-bold text-lg mb-4 flex items-center gap-2">
+        <Database size={20} className="text-blue-500" /> 資料庫連接設定 (GAS)
+      </h3>
+      <div className="space-y-4">
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Google Sheet ID</label>
+          <input type="text" className="w-full p-2 bg-gray-50 border rounded-lg font-mono text-sm" placeholder="輸入你的試算表 ID..." />
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">GAS Web App URL</label>
+          <input type="text" className="w-full p-2 bg-gray-50 border rounded-lg font-mono text-sm" placeholder="https://script.google.com/macros/s/..." />
+        </div>
+      </div>
+    </section>
+    
+    <section>
+      <h3 className="font-bold text-lg mb-4 flex items-center gap-2">
+        <Bell size={20} className="text-yellow-500" /> 通知發送設定 (預留)
+      </h3>
+      <div className="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
+        <div>
+          <p className="font-medium">缺席自動通知</p>
+          <p className="text-xs text-gray-400">當點名標記為「未到」時，發送簡訊/LINE 給家長</p>
+        </div>
+        <div className="w-12 h-6 bg-gray-300 rounded-full relative cursor-pointer opacity-50">
+          <div className="absolute left-1 top-1 w-4 h-4 bg-white rounded-full"></div>
+        </div>
+      </div>
+      <p className="text-[10px] text-red-400 mt-2">* 此功能涉及第三方 API 費用，目前為關閉狀態。</p>
+    </section>
 
-            // 更新導航欄樣式
-            const navItems = document.querySelectorAll('.nav-item');
-            navItems.forEach(item => {
-                if (item.getAttribute('data-tab') === tabId) {
-                    item.classList.add('sidebar-active');
-                    item.classList.remove('text-gray-400');
-                    
-                    // 更新 Header 標題
-                    const titleMap = {
-                        'dashboard': '數據概覽',
-                        'members': '會員名冊管理',
-                        'courses': '課程與商品建置',
-                        'checkin': '當日點名核銷',
-                        'settings': '系統參數設定'
-                    };
-                    document.getElementById('current-tab-title').innerText = titleMap[tabId];
-                } else {
-                    item.classList.remove('sidebar-active');
-                    item.classList.add('text-gray-400');
-                }
-            });
+    <button className="w-full py-3 bg-[#2c3e50] text-white rounded-xl font-bold hover:bg-[#1a252f] transition-all">
+      儲存系統參數設定
+    </button>
+  </div>
+);
 
-            // 針對手機版：點擊後自動關閉側邊欄（選用）
-            if (window.innerWidth < 768) {
-                const sidebar = document.getElementById('sidebar');
-                if (sidebar.classList.contains('w-64')) toggleSidebar();
-            }
-        }
-
-        // 監聽視窗大小，自動調整側邊欄
-        window.addEventListener('resize', () => {
-            const sidebar = document.getElementById('sidebar');
-            if (window.innerWidth < 1024 && sidebar.classList.contains('w-64')) {
-                toggleSidebar();
-            }
-        });
-
-        // 初始檢查視窗大小
-        if (window.innerWidth < 1024) toggleSidebar();
-    </script>
-</body>
-</html>
+export default App;
