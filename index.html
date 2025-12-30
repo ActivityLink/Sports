@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SportFlow | 最終驗證版 V2.6</title>
+    <!-- 引入系統資源 -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root { --line-green: #06C755; --line-dark: #1e293b; --line-active: #0f172a; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; margin: 0; background-color: #f1f5f9; }
+        .sidebar-active { background-color: var(--line-active); color: var(--line-green); border-left: 4px solid var(--line-green); }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .loader { border: 3px solid #f3f3f3; border-top: 3px solid var(--line-green); border-radius: 50%; width: 20px; height: 20px; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body class="flex h-screen overflow-hidden">
+
+    <!-- 左側側邊欄 -->
+    <aside id="sidebar" class="w-64 bg-[#0f172a] text-white flex flex-col h-full transition-all duration-300 shadow-2xl z-20 shrink-0">
+        <div class="p-6 flex items-center gap-3 border-b border-slate-700">
+            <div class="w-10 h-10 bg-green-500 rounded-xl flex items-center justify-center font-bold text-white shadow-lg border border-white/20">S</div>
+            <div class="sidebar-text">
+                <span class="font-black text-xl tracking-tighter uppercase italic block">SportFlow</span>
+                <span class="text-[10px] text-green-400 font-mono tracking-widest font-bold">LATEST V2.6</span>
+            </div>
+        </div>
+
+        <nav class="flex-1 mt-4 overflow-y-auto no-scrollbar">
+            <a href="javascript:void(0)" onclick="switchTab('dashboard')" class="nav-item sidebar-active flex items-center gap-4 px-6 py-4 transition-colors" data-tab="dashboard">
+                <i data-lucide="layout-dashboard" class="w-5 h-5 shrink-0"></i><span class="sidebar-text font-bold">數據概覽</span>
+            </a>
+            <a href="javascript:void(0)" onclick="switchTab('members')" class="nav-item flex items-center gap-4 px-6 py-4 text-slate-400 hover:text-white transition-colors" data-tab="members">
+                <i data-lucide="users" class="w-5 h-5 shrink-0"></i><span class="sidebar-text font-bold">會員名冊管理</span>
+            </a>
+            <a href="javascript:void(0)" onclick="switchTab('courses')" class="nav-item flex items-center gap-4 px-6 py-4 text-slate-400 hover:text-white transition-colors" data-tab="courses">
+                <i data-lucide="calendar" class="w-5 h-5 shrink-0"></i><span class="sidebar-text font-bold">課程與商品建置</span>
+            </a>
+            
+            <div class="border-t border-slate-800 my-4 mx-4"></div>
+            <p class="sidebar-text px-6 mb-2 text-[10px] text-slate-500 font-black uppercase tracking-[0.2em]">New Functional Areas</p>
+            
+            <a href="javascript:void(0)" onclick="switchTab('announcements')" class="nav-item flex items-center gap-4 px-6 py-4 text-slate-400 hover:text-white transition-colors" data-tab="announcements">
+                <i data-lucide="megaphone" class="w-5 h-5 shrink-0 text-amber-400"></i><span class="sidebar-text font-bold">前台公告管理</span>
+            </a>
+            <a href="javascript:void(0)" onclick="switchTab('equipment')" class="nav-item flex items-center gap-4 px-6 py-4 text-slate-400 hover:text-white transition-colors" data-tab="equipment">
+                <i data-lucide="hammer" class="w-5 h-5 shrink-0 text-sky-400"></i><span class="sidebar-text font-bold">設備租用管理</span>
+            </a>
+            <a href="javascript:void(0)" onclick="switchTab('settings')" class="nav-item flex items-center gap-4 px-6 py-4 text-slate-400 hover:text-white transition-colors" data-tab="settings">
+                <i data-lucide="settings" class="w-5 h-5 shrink-0 text-slate-200"></i><span class="sidebar-text font-bold text-white">系統參數設置</span>
+            </a>
+        </nav>
+        <div class="p-4 border-t border-slate-800 text-[10px] text-slate-500 text-center font-black tracking-widest bg-slate-900/50">BUILD 2025.12.30</div>
+    </aside>
+
+    <!-- 右側主要區域 -->
+    <div class="flex-1 flex flex-col min-w-0 relative">
+        <header class="h-16 bg-[#0f172a] shadow-lg flex items-center justify-between px-8 shrink-0 z-10 border-b border-slate-700">
+            <div class="flex items-center gap-4">
+                <button onclick="toggleSidebar()" class="p-2 hover:bg-slate-800 rounded-md lg:hidden text-white"><i data-lucide="menu" class="w-6 h-6"></i></button>
+                <h2 id="tab-title" class="text-xl font-black text-white italic tracking-tight uppercase">SportFlow Portal</h2>
+                <div id="loading" class="hidden flex items-center gap-2 text-xs text-green-400 italic ml-4 font-bold"><div class="loader"></div> SYNCING...</div>
+            </div>
+            <div class="flex items-center gap-3 bg-slate-800 px-4 py-1.5 rounded-full border border-slate-700">
+                <div id="api-status-dot" class="w-2.5 h-2.5 rounded-full bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.5)]"></div>
+                <div class="text-[11px] font-black text-white tracking-widest uppercase">Admin: Tony</div>
+            </div>
+        </header>
+
+        <main class="flex-1 overflow-y-auto p-4 md:p-10">
+            
+            <!-- 模組：儀表板 -->
+            <div id="dashboard" class="tab-content active space-y-8">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <div class="bg-white p-8 rounded-3xl shadow-sm border border-slate-100 flex items-center gap-6">
+                        <div class="p-4 bg-green-50 text-green-500 rounded-2xl shadow-inner"><i data-lucide="users" class="w-8 h-8"></i></div>
+                        <div><p class="text-xs text-slate-400 font-black uppercase tracking-widest">Total Members</p><h3 id="stat-members" class="text-4xl font-black text-slate-800 tracking-tighter">--</h3></div>
+                    </div>
+                    <div class="bg-white p-8 rounded-3xl shadow-sm border border-slate-100 flex items-center gap-6">
+                        <div class="p-4 bg-blue-50 text-blue-500 rounded-2xl shadow-inner"><i data-lucide="calendar" class="w-8 h-8"></i></div>
+                        <div><p class="text-xs text-slate-400 font-black uppercase tracking-widest">Live Courses</p><h3 id="stat-courses" class="text-4xl font-black text-slate-800 tracking-tighter">--</h3></div>
+                    </div>
+                    <button onclick="refreshDashboard()" class="bg-slate-800 text-white p-8 rounded-3xl shadow-2xl flex flex-col items-center justify-center gap-2 hover:bg-black active:scale-95 transition-all">
+                        <i data-lucide="refresh-cw" class="w-8 h-8 text-green-400"></i><span class="text-[10px] font-black tracking-[0.2em]">FORCE SYNC NOW</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- 模組：系統設置 -->
+            <div id="settings" class="tab-content">
+                <div class="max-w-2xl bg-white p-10 rounded-3xl shadow-2xl border border-slate-100 space-y-10">
+                    <div class="bg-red-50 border border-red-100 p-4 rounded-xl text-red-700 text-xs font-bold">
+                        注意：若儲存後沒反應，請按 F12 檢查 Console 報錯，並確認 GAS 已發布為「所有人」。
+                    </div>
+                    
+                    <section>
+                        <h3 class="font-black text-2xl text-slate-800 border-b pb-6 flex items-center gap-3 italic uppercase tracking-tighter">
+                            <i data-lucide="link-2" class="text-blue-500"></i> GAS API CONFIG
+                        </h3>
+                        <div class="mt-6 space-y-3">
+                            <label class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] block">Google Apps Script Exec URL</label>
+                            <input type="text" id="api-url-input" class="w-full p-5 bg-slate-900 text-green-400 border-none rounded-2xl font-mono text-xs shadow-inner outline-none focus:ring-2 focus:ring-green-500" placeholder="Paste your https://script.google.com/macros/s/.../exec">
+                        </div>
+                    </section>
+
+                    <section>
+                        <h3 class="font-black text-2xl text-slate-800 border-b pb-6 flex items-center gap-3 italic uppercase tracking-tighter">
+                            <i data-lucide="credit-card" class="text-orange-500"></i> BANK INFO
+                        </h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+                            <div class="space-y-2">
+                                <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest block">Bank Code/Name</label>
+                                <input type="text" id="bank-name" class="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl font-bold outline-none focus:ring-2 focus:ring-orange-400" placeholder="中國信託 (822)">
+                            </div>
+                            <div class="space-y-2">
+                                <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest block">Account Name</label>
+                                <input type="text" id="bank-user" class="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl font-bold outline-none focus:ring-2 focus:ring-orange-400" placeholder="Tony Center">
+                            </div>
+                            <div class="md:col-span-2 space-y-2">
+                                <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest block">Account Number</label>
+                                <input type="text" id="bank-account" class="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl font-mono font-bold outline-none focus:ring-2 focus:ring-orange-400" placeholder="123-456-789012">
+                            </div>
+                        </div>
+                    </section>
+                    
+                    <button id="save-btn" onclick="saveAllSettings()" class="w-full py-6 bg-green-600 text-white rounded-3xl font-black uppercase shadow-2xl shadow-green-200 hover:bg-green-700 active:scale-[0.98] transition-all tracking-[0.3em] text-sm">
+                        SYNC & SAVE CONFIGURATION
+                    </button>
+                </div>
+            </div>
+
+            <!-- 公告管理 -->
+            <div id="announcements" class="tab-content space-y-6">
+                <div class="bg-white p-8 rounded-3xl shadow-sm border border-slate-100">
+                    <h3 class="font-black text-xl mb-6 text-slate-800 flex items-center gap-3 uppercase italic"><i data-lucide="megaphone" class="text-amber-500"></i> New Feed</h3>
+                    <div class="flex flex-col md:flex-row gap-4">
+                        <input type="text" id="ann-title" placeholder="輸入公告內容..." class="flex-1 p-5 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-amber-400 font-bold">
+                        <button onclick="addAnnouncement()" class="bg-amber-500 text-white px-10 py-5 rounded-2xl font-black shadow-xl hover:bg-amber-600 transition-all uppercase tracking-widest">Publish</button>
+                    </div>
+                </div>
+                <div id="ann-list" class="space-y-4"></div>
+            </div>
+
+            <!-- 設備管理 -->
+            <div id="equipment" class="tab-content space-y-6">
+                <div class="bg-white p-8 rounded-3xl shadow-sm border border-slate-100">
+                    <h3 class="font-black text-xl mb-6 text-slate-800 flex items-center gap-3 uppercase italic"><i data-lucide="hammer" class="text-sky-500"></i> Inventory</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <input type="text" id="eq-name" placeholder="設備名稱" class="p-4 bg-slate-50 border border-slate-200 rounded-2xl font-bold">
+                        <input type="number" id="eq-fee" placeholder="費用" class="p-4 bg-slate-50 border border-slate-200 rounded-2xl font-bold">
+                        <button onclick="addEquipment()" class="w-full bg-sky-600 text-white py-4 rounded-2xl font-black shadow-xl hover:bg-sky-700 transition-all uppercase tracking-widest">Add Asset</button>
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6" id="eq-list"></div>
+            </div>
+
+            <!-- 會員管理 -->
+            <div id="members" class="tab-content">
+                <div class="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden">
+                    <div class="p-8 border-b flex justify-between items-center bg-slate-50/50">
+                        <h3 class="font-black italic tracking-widest text-slate-700 uppercase text-lg">Members Data</h3>
+                        <button onclick="loadMembers()" class="bg-green-600 text-white text-[10px] font-black px-6 py-2 rounded-full shadow-xl hover:bg-green-700 uppercase tracking-widest">Reload</button>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-sm"><thead class="bg-white border-b text-slate-400 font-black uppercase"><tr><th class="px-8 py-5">姓名</th><th class="px-8 py-5">手機</th><th class="px-8 py-5 text-center">點數</th><th class="px-8 py-5 text-right">操作</th></tr></thead><tbody id="member-list" class="divide-y text-slate-600"></tbody></table>
+                    </div>
+                </div>
+            </div>
+
+            <div id="courses" class="tab-content text-center py-20 text-slate-400 italic">Courses Module Loading...</div>
+        </main>
+    </div>
+
+    <!-- 前端核心 JavaScript 邏輯 -->
+    <script>
+        let apiUrl = localStorage.getItem('sportflow_api_url') || '';
+
+        // 頁面啟動初始化
+        window.onload = () => {
+            // 確認檔案有讀取成功
+            console.log("V2.6 Framework Loaded Successfully.");
+            lucide.createIcons();
+            
+            document.getElementById('api-url-input').value = apiUrl;
+            
+            if (apiUrl) {
+                checkApiStatus();
+                refreshDashboard();
+                loadBankInfo();
+            } else {
+                switchTab('settings');
+            }
+        };
+
+        function showLoading(isLoading) { document.getElementById('loading').classList.toggle('hidden', !isLoading); }
+        
+        function checkApiStatus() { 
+            const dot = document.getElementById('api-status-dot');
+            if (apiUrl && apiUrl.includes('/exec')) {
+                dot.style.backgroundColor = '#22c55e';
+                dot.classList.remove('animate-pulse');
+            } else {
+                dot.style.backgroundColor = '#ef4444';
+                dot.classList.add('animate-pulse');
+            }
+        }
+
+        // 強力除錯版 API 呼叫
+        async function apiFetch(action, params = {}) {
+            if (!apiUrl) {
+                console.warn("API URL is missing.");
+                return { success: false, message: '尚未填寫 API 網址' };
+            }
+            showLoading(true);
+            try {
+                const query = new URLSearchParams({ action, ...params }).toString();
+                const response = await fetch(`${apiUrl}?${query}`);
+                
+                if (!response.ok) {
+                    throw new Error(`伺服器回應錯誤: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                return data;
+            } catch (e) { 
+                console.error("Fetch Exception:", e);
+                // 這裡加入警告視窗方便 Tony 除錯
+                alert("🔴 遠端連線失敗！\n\n錯誤訊息：" + e.message + "\n\n1. 請確認 GAS 網址結尾是 /exec\n2. 請確認 GAS 已發布為「所有人」\n3. 請確認網路正常");
+                return { success: false, message: e.toString() }; 
+            } finally { 
+                showLoading(false); 
+            }
+        }
+
+        async function saveAllSettings() {
+            const btn = document.getElementById('save-btn');
+            btn.innerText = 'SYNCING...';
+            btn.disabled = true;
+
+            const inputUrl = document.getElementById('api-url-input').value.trim();
+            if (!inputUrl || !inputUrl.startsWith('https://')) {
+                alert('🔴 請貼上有效的 https 網址');
+                btn.innerText = 'SYNC & SAVE CONFIGURATION';
+                btn.disabled = false;
+                return;
+            }
+
+            apiUrl = inputUrl;
+            localStorage.setItem('sportflow_api_url', apiUrl);
+            
+            const bankData = { 
+                bank: document.getElementById('bank-name').value, 
+                user: document.getElementById('bank-user').value, 
+                account: document.getElementById('bank-account').value 
+            };
+            
+            const res = await apiFetch('saveBankInfo', bankData);
+            
+            if (res && res.success) {
+                alert('✅ 儲存成功！');
+                checkApiStatus();
+                switchTab('dashboard');
+            } else {
+                alert('⚠️ API 有回應但儲存失敗：' + (res ? res.message : '未知原因'));
+            }
+            
+            btn.innerText = 'SYNC & SAVE CONFIGURATION';
+            btn.disabled = false;
+        }
+
+        async function loadBankInfo() {
+            const res = await apiFetch('getBankInfo');
+            if (res && res.success && res.data) {
+                document.getElementById('bank-name').value = res.data.bank || '';
+                document.getElementById('bank-user').value = res.data.user || '';
+                document.getElementById('bank-account').value = res.data.account || '';
+            }
+        }
+
+        async function refreshDashboard() {
+            const data = await apiFetch('getStats');
+            if (data && data.success) {
+                document.getElementById('stat-members').innerText = data.stats.members;
+                document.getElementById('stat-courses').innerText = data.stats.courses;
+            }
+        }
+
+        async function loadMembers() {
+            const list = document.getElementById('member-list');
+            list.innerHTML = '<tr><td colspan="4" class="p-20 text-center italic text-slate-400 font-bold tracking-widest">CONNECTING TO SHEETS...</td></tr>';
+            const data = await apiFetch('getMembers');
+            if (data && data.length > 0) {
+                list.innerHTML = data.map(m => `
+                    <tr class="hover:bg-white transition-all">
+                        <td class="px-8 py-6 font-black text-slate-800">${m.name}</td>
+                        <td class="px-8 py-6 font-mono text-slate-400 text-xs tracking-tighter">${m.phone}</td>
+                        <td class="px-8 py-6 text-center"><span class="bg-green-100 text-green-700 px-4 py-1 rounded-full font-black text-xs">${m.points} PT</span></td>
+                        <td class="px-8 py-6 text-right"><button class="text-blue-600 font-black text-xs italic tracking-widest uppercase">Detail</button></td>
+                    </tr>
+                `).join('');
+            } else {
+                list.innerHTML = '<tr><td colspan="4" class="p-20 text-center text-slate-300 font-black uppercase italic tracking-[0.2em]">Zero Records Found</td></tr>';
+            }
+        }
+
+        async function addAnnouncement() {
+            const title = document.getElementById('ann-title').value.trim();
+            if (!title) return alert('請填寫內容');
+            const res = await apiFetch('addAnnouncement', { title });
+            if(res.success) { document.getElementById('ann-title').value = ''; loadAnnouncements(); }
+        }
+
+        async function loadAnnouncements() {
+            const list = document.getElementById('ann-list');
+            list.innerHTML = '<p class="p-10 text-center text-slate-400 font-black tracking-widest uppercase italic">Fetching Feed...</p>';
+            const data = await apiFetch('getAnnouncements');
+            if (data && data.length > 0) {
+                list.innerHTML = data.map(a => `
+                    <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-100 flex justify-between items-center group">
+                        <div class="border-l-8 border-amber-400 pl-6">
+                            <p class="font-black text-slate-800 text-lg">${a.title}</p>
+                            <p class="text-[10px] text-slate-400 font-mono mt-2 uppercase tracking-widest">${a.date}</p>
+                        </div>
+                        <button onclick="deleteAnn('${a.id}')" class="text-slate-200 hover:text-red-500 transition-colors p-4"><i data-lucide="trash-2" class="w-6 h-6"></i></button>
+                    </div>
+                `).join('');
+                lucide.createIcons();
+            } else {
+                list.innerHTML = '<p class="p-10 text-center text-slate-300 font-black uppercase italic">No active feed</p>';
+            }
+        }
+
+        async function addEquipment() {
+            const name = document.getElementById('eq-name').value.trim();
+            const fee = document.getElementById('eq-fee').value.trim();
+            if (!name || !fee) return alert('資料不全');
+            const res = await apiFetch('addEquipment', { name, fee });
+            if(res.success) { document.getElementById('eq-name').value = ''; document.getElementById('eq-fee').value = ''; loadEquipment(); }
+        }
+
+        async function loadEquipment() {
+            const list = document.getElementById('eq-list');
+            list.innerHTML = '<p class="p-4 text-slate-400 italic font-black uppercase tracking-widest">Loading assets...</p>';
+            const data = await apiFetch('getEquipment');
+            if (data && data.length > 0) {
+                list.innerHTML = data.map(e => `
+                    <div class="bg-white p-8 rounded-3xl border-2 border-slate-50 flex justify-between items-center hover:border-sky-200 transition-all">
+                        <div>
+                            <p class="font-black text-slate-800 text-xl tracking-tighter uppercase">${e.name}</p>
+                            <p class="text-xs text-sky-600 font-black mt-2 tracking-[0.2em] font-mono">$${e.fee} / UNIT</p>
+                        </div>
+                        <button onclick="deleteEq('${e.id}')" class="text-slate-200 hover:text-red-500 transition-colors"><i data-lucide="trash-2" class="w-6 h-6"></i></button>
+                    </div>
+                `).join('');
+                lucide.createIcons();
+            } else {
+                list.innerHTML = '<p class="p-4 text-slate-300 font-black italic tracking-widest uppercase">Empty assets</p>';
+            }
+        }
+
+        function switchTab(id) {
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            document.querySelectorAll('.nav-item').forEach(n => {
+                n.classList.toggle('sidebar-active', n.dataset.tab === id);
+                n.classList.toggle('text-slate-400', n.dataset.tab !== id);
+            });
+            const titles = { 'dashboard': 'DASHBOARD', 'members': 'MEMBERS', 'announcements': 'ANNOUNCEMENTS', 'equipment': 'EQUIPMENT', 'settings': 'SYSTEM SETTINGS', 'courses': 'COURSES' };
+            document.getElementById('tab-title').innerText = titles[id] || 'SportFlow Portal';
+            if (id === 'dashboard') refreshDashboard();
+            if (id === 'members') loadMembers();
+            if (id === 'announcements') loadAnnouncements();
+            if (id === 'equipment') loadEquipment();
+            if (id === 'settings') loadBankInfo();
+            lucide.createIcons();
+            if (window.innerWidth < 1024) toggleSidebar(true);
+        }
+
+        function toggleSidebar(forceClose = false) {
+            const s = document.getElementById('sidebar');
+            if (forceClose) { s.classList.replace('w-64', 'w-0'); document.querySelectorAll('.sidebar-text').forEach(t => t.classList.add('hidden')); }
+            else {
+                if (s.classList.contains('w-64')) { s.classList.replace('w-64', 'w-0'); document.querySelectorAll('.sidebar-text').forEach(t => t.classList.add('hidden')); }
+                else { s.classList.replace('w-0', 'w-64'); document.querySelectorAll('.sidebar-text').forEach(t => t.classList.remove('hidden')); }
+            }
+        }
+    </script>
+</body>
+</html>
