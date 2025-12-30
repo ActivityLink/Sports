@@ -13,12 +13,16 @@ import {
   MoreVertical,
   UserCheck,
   Smartphone,
-  Database
+  Database,
+  Megaphone,
+  Hammer,
+  CreditCard,
+  Trash2
 } from 'lucide-react';
 
 /**
- * 運動課程管理系統 - 管理者後台 (LINE OA 風格)
- * 特色：模組化結構、響應式佈局、仿 LINE 介面設計
+ * SportFlow - 管理者後台 (LINE OA 風格)
+ * 更新內容：新增公告管理、設備租用管理、匯款帳號設定
  */
 
 const App = () => {
@@ -42,6 +46,10 @@ const App = () => {
         return <CourseManagement />;
       case 'checkin':
         return <AttendanceCheckIn />;
+      case 'announcements':
+        return <AnnouncementManagement />;
+      case 'equipment':
+        return <EquipmentManagement />;
       case 'settings':
         return <SystemSettings />;
       default:
@@ -51,14 +59,14 @@ const App = () => {
 
   return (
     <div className="flex h-screen bg-gray-100 text-gray-800 font-sans">
-      {/* 左側導航欄 (Sidebar) - 仿 LINE OA */}
-      <aside className={`${isSidebarOpen ? 'w-64' : 'w-20'} bg-[#2c3e50] text-white transition-all duration-300 flex flex-col`}>
+      {/* 左側導航欄 (Sidebar) */}
+      <aside className={`${isSidebarOpen ? 'w-64' : 'w-20'} bg-[#2c3e50] text-white transition-all duration-300 flex flex-col shadow-xl z-20`}>
         <div className="p-6 flex items-center gap-3 border-b border-gray-700">
-          <div className="w-8 h-8 bg-[#06C755] rounded-lg flex items-center justify-center font-bold text-white">S</div>
-          {isSidebarOpen && <span className="font-bold text-lg tracking-wider">運動管理系統</span>}
+          <div className="w-8 h-8 bg-[#06C755] rounded-lg flex items-center justify-center font-bold text-white shadow-lg">S</div>
+          {isSidebarOpen && <span className="font-bold text-lg tracking-tighter uppercase italic">SportFlow</span>}
         </div>
 
-        <nav className="flex-1 mt-4">
+        <nav className="flex-1 mt-4 overflow-y-auto no-scrollbar">
           <NavItem 
             icon={<LayoutDashboard size={20} />} 
             label="儀表板首頁" 
@@ -87,10 +95,26 @@ const App = () => {
             onClick={() => setActiveTab('checkin')} 
             collapsed={!isSidebarOpen}
           />
+          
           <div className="border-t border-gray-700 my-2"></div>
+          
+          <NavItem 
+            icon={<Megaphone size={20} />} 
+            label="前台公告管理" 
+            active={activeTab === 'announcements'} 
+            onClick={() => setActiveTab('announcements')} 
+            collapsed={!isSidebarOpen}
+          />
+          <NavItem 
+            icon={<Hammer size={20} />} 
+            label="設備租用管理" 
+            active={activeTab === 'equipment'} 
+            onClick={() => setActiveTab('equipment')} 
+            collapsed={!isSidebarOpen}
+          />
           <NavItem 
             icon={<Settings size={20} />} 
-            label="系統參數區" 
+            label="系統參數設置" 
             active={activeTab === 'settings'} 
             onClick={() => setActiveTab('settings')} 
             collapsed={!isSidebarOpen}
@@ -106,44 +130,40 @@ const App = () => {
       </aside>
 
       {/* 右側主要區域 */}
-      <main className="flex-1 flex flex-col overflow-hidden">
-        {/* 頂部 Header */}
-        <header className="h-16 bg-white shadow-sm flex items-center justify-between px-8">
+      <main className="flex-1 flex flex-col overflow-hidden relative">
+        <header className="h-16 bg-white shadow-sm flex items-center justify-between px-8 z-10">
           <div className="flex items-center gap-4">
             <button 
               onClick={() => setSidebarOpen(!isSidebarOpen)}
-              className="p-2 hover:bg-gray-100 rounded-md"
+              className="p-2 hover:bg-gray-100 rounded-md transition-colors"
             >
               <div className="w-5 h-0.5 bg-gray-600 mb-1"></div>
               <div className="w-5 h-0.5 bg-gray-600 mb-1"></div>
               <div className="w-5 h-0.5 bg-gray-600"></div>
             </button>
-            <h2 className="text-xl font-semibold text-gray-700 capitalize">
+            <h2 className="text-xl font-bold text-gray-700">
               {activeTab === 'dashboard' ? '數據概覽' : 
                activeTab === 'members' ? '會員名冊' : 
                activeTab === 'courses' ? '課程管理' : 
-               activeTab === 'checkin' ? '核銷作業' : '系統設置'}
+               activeTab === 'checkin' ? '核銷作業' : 
+               activeTab === 'announcements' ? '公告管理' :
+               activeTab === 'equipment' ? '設備管理' : '系統設置'}
             </h2>
           </div>
           <div className="flex items-center gap-4">
-            <button className="relative p-2 text-gray-500 hover:bg-gray-100 rounded-full">
-              <Bell size={20} />
-              <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></span>
-            </button>
             <div className="flex items-center gap-2 pl-4 border-l">
               <div className="text-right">
-                <p className="text-sm font-medium">Tony 管理員</p>
-                <p className="text-xs text-gray-400">總管理權限</p>
+                <p className="text-sm font-bold text-gray-800">Tony 管理員</p>
+                <p className="text-[10px] text-green-500 font-bold tracking-widest uppercase">Admin Active</p>
               </div>
-              <div className="w-10 h-10 bg-gray-200 rounded-full overflow-hidden border border-gray-300">
+              <div className="w-10 h-10 bg-gray-200 rounded-full overflow-hidden border-2 border-white shadow-sm">
                 <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Tony" alt="avatar" />
               </div>
             </div>
           </div>
         </header>
 
-        {/* 內容區塊 */}
-        <section className="flex-1 overflow-y-auto p-8">
+        <section className="flex-1 overflow-y-auto p-4 md:p-8 bg-gray-50">
           {renderContent()}
         </section>
       </main>
@@ -167,40 +187,140 @@ const NavItem = ({ icon, label, active, onClick, collapsed }) => (
 
 // --- 子組件：儀表板視圖 ---
 const DashboardView = ({ stats }) => (
-  <div className="space-y-8">
+  <div className="space-y-8 animate-in fade-in duration-500">
     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
       {stats.map((item, idx) => (
-        <div key={idx} className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex items-center gap-4">
-          <div className="p-4 bg-green-50 text-[#06C755] rounded-xl">
+        <div key={idx} className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex items-center gap-4 hover:shadow-md transition-shadow">
+          <div className="p-4 bg-green-50 text-[#06C755] rounded-2xl">
             <item.icon size={24} />
           </div>
           <div>
-            <p className="text-sm text-gray-500">{item.label}</p>
-            <div className="flex items-baseline gap-2">
+            <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">{item.label}</p>
+            <div className="flex items-baseline gap-2 mt-1">
               <h3 className="text-2xl font-bold">{item.value}</h3>
-              <span className="text-xs text-green-600 font-medium">{item.change}</span>
+              <span className="text-xs text-green-600 font-bold">{item.change}</span>
             </div>
           </div>
         </div>
       ))}
     </div>
     
-    <div className="bg-white p-8 rounded-xl shadow-sm border border-gray-100">
+    <div className="bg-white p-8 rounded-2xl shadow-sm border border-gray-100">
       <div className="flex justify-between items-center mb-6">
-        <h3 className="font-bold text-lg">最近報名動態</h3>
-        <button className="text-[#06C755] text-sm font-medium hover:underline">查看全部</button>
+        <h3 className="font-bold text-lg text-gray-800">最近系統動態</h3>
+        <button className="text-[#06C755] text-sm font-bold hover:underline">查看全部</button>
       </div>
       <div className="space-y-4">
         {[1, 2, 3].map(i => (
-          <div key={i} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+          <div key={i} className="flex items-center justify-between p-4 bg-gray-50 rounded-xl border border-gray-100">
             <div className="flex items-center gap-4">
               <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center text-green-700 font-bold">W</div>
               <div>
-                <p className="font-medium">王小明 預約了「進階羽球課程」</p>
-                <p className="text-xs text-gray-400">10 分鐘前 · LINE 預約</p>
+                <p className="text-sm font-bold">系統通知：每日自動備份已於 03:00 完成</p>
+                <p className="text-[10px] text-gray-400">5 小時前 · Cloud Storage</p>
               </div>
             </div>
-            <span className="px-3 py-1 bg-green-100 text-green-700 text-xs rounded-full">付款完成</span>
+            <span className="px-3 py-1 bg-green-100 text-green-700 text-[10px] font-bold rounded-full">正常運作</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  </div>
+);
+
+// --- 子組件：公告管理 (New) ---
+const AnnouncementManagement = () => (
+  <div className="space-y-6 animate-in slide-in-from-bottom-4 duration-500">
+    <div className="flex justify-between items-center">
+      <div>
+        <h3 className="text-lg font-bold">前台公告設置</h3>
+        <p className="text-xs text-gray-400">這些內容將直接顯示在 LINE OA 前台告示欄</p>
+      </div>
+      <button className="flex items-center gap-2 px-4 py-2 bg-[#06C755] text-white rounded-xl font-bold text-sm shadow-lg shadow-green-100 hover:bg-[#05b54c]">
+        <Plus size={18} /> 新增公告
+      </button>
+    </div>
+
+    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+      <table className="w-full text-left text-sm">
+        <thead className="bg-gray-50 border-b text-gray-500 font-bold">
+          <tr>
+            <th className="px-6 py-4">公告標題</th>
+            <th className="px-6 py-4">狀態</th>
+            <th className="px-6 py-4">發布時間</th>
+            <th className="px-6 py-4 text-right">操作</th>
+          </tr>
+        </thead>
+        <tbody className="divide-y">
+          {[
+            { title: '🎉 年終羽球錦標賽開放報名！', status: '顯示中', date: '2025-12-30' },
+            { title: '🚧 1/1 元旦教室維護通知', status: '顯示中', date: '2025-12-28' },
+            { title: '💡 報名系統使用指南更新', status: '已隱藏', date: '2025-12-20' },
+          ].map((item, idx) => (
+            <tr key={idx} className="hover:bg-gray-50">
+              <td className="px-6 py-4 font-bold text-gray-700">{item.title}</td>
+              <td className="px-6 py-4">
+                <span className={`px-2 py-1 rounded text-[10px] font-bold ${item.status === '顯示中' ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-500'}`}>
+                  {item.status}
+                </span>
+              </td>
+              <td className="px-6 py-4 text-gray-400 font-mono text-xs">{item.date}</td>
+              <td className="px-6 py-4 text-right">
+                <div className="flex justify-end gap-2">
+                  <button className="text-blue-500 text-xs font-bold hover:underline">編輯</button>
+                  <button className="text-red-500"><Trash2 size={16} /></button>
+                </div>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  </div>
+);
+
+// --- 子組件：設備租用管理 (New) ---
+const EquipmentManagement = () => (
+  <div className="space-y-6 animate-in slide-in-from-bottom-4 duration-500">
+    <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+      <h3 className="text-lg font-bold mb-4 flex items-center gap-2">
+        <Hammer size={20} className="text-[#06C755]" /> 新增設備資料
+      </h3>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div>
+          <label className="block text-[10px] font-bold text-gray-400 uppercase mb-1">設備名稱</label>
+          <input type="text" placeholder="例如：YONEX 羽球拍" className="w-full p-2 bg-gray-50 border rounded-xl outline-none focus:ring-2 focus:ring-green-400 text-sm" />
+        </div>
+        <div>
+          <label className="block text-[10px] font-bold text-gray-400 uppercase mb-1">租用費用 (每小時)</label>
+          <input type="number" placeholder="50" className="w-full p-2 bg-gray-50 border rounded-xl outline-none focus:ring-2 focus:ring-green-400 text-sm" />
+        </div>
+        <div className="flex items-end">
+          <button className="w-full py-2 bg-[#2c3e50] text-white rounded-xl font-bold text-sm hover:bg-black transition-all">
+            確認上傳設備
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+      <div className="p-4 border-b">
+        <h4 className="font-bold text-gray-800">現有設備清單</h4>
+      </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 p-6">
+        {[
+          { name: '進階款羽球拍', fee: 100 },
+          { name: '護膝套組', fee: 50 },
+          { name: '專業桌球板', fee: 80 },
+        ].map((item, idx) => (
+          <div key={idx} className="flex justify-between items-center p-4 bg-gray-50 rounded-xl border border-gray-100 group">
+            <div>
+              <p className="font-bold text-gray-700">{item.name}</p>
+              <p className="text-xs text-green-600 font-bold">${item.fee} / HR</p>
+            </div>
+            <button className="text-gray-300 group-hover:text-red-500 transition-colors">
+              <Trash2 size={18} />
+            </button>
           </div>
         ))}
       </div>
@@ -210,56 +330,48 @@ const DashboardView = ({ stats }) => (
 
 // --- 子組件：會員管理 ---
 const MemberManagement = () => (
-  <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+  <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden animate-in fade-in duration-500">
     <div className="p-6 border-b flex flex-col md:flex-row md:items-center justify-between gap-4">
       <div className="relative w-full md:w-80">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
         <input 
           type="text" 
           placeholder="搜尋會員姓名或手機..." 
-          className="w-full pl-10 pr-4 py-2 bg-gray-50 border rounded-lg focus:ring-2 focus:ring-[#06C755] outline-none"
+          className="w-full pl-10 pr-4 py-2 bg-gray-50 border rounded-xl focus:ring-2 focus:ring-[#06C755] outline-none text-sm"
         />
       </div>
       <div className="flex gap-2">
-        <button className="flex items-center gap-2 px-4 py-2 border rounded-lg hover:bg-gray-50">
-          <Database size={18} />
-          匯出 Excel
+        <button className="flex items-center gap-2 px-4 py-2 border rounded-xl hover:bg-gray-50 text-sm font-bold">
+          <Database size={18} /> 匯出 Excel
         </button>
-        <button className="flex items-center gap-2 px-4 py-2 bg-[#06C755] text-white rounded-lg hover:bg-[#05b54c]">
-          <Plus size={18} />
-          新增會員
+        <button className="flex items-center gap-2 px-4 py-2 bg-[#06C755] text-white rounded-xl hover:bg-[#05b54c] text-sm font-bold shadow-lg shadow-green-100">
+          <Plus size={18} /> 新增會員
         </button>
       </div>
     </div>
     <div className="overflow-x-auto">
       <table className="w-full text-left text-sm">
-        <thead className="bg-gray-50 border-b">
+        <thead className="bg-gray-50 border-b text-gray-500 font-bold">
           <tr>
-            <th className="px-6 py-4 font-semibold">會員姓名</th>
-            <th className="px-6 py-4 font-semibold">LINE ID</th>
-            <th className="px-6 py-4 font-semibold">手機</th>
-            <th className="px-6 py-4 font-semibold">累積點數</th>
-            <th className="px-6 py-4 font-semibold">報名紀錄</th>
-            <th className="px-6 py-4 font-semibold">操作</th>
+            <th className="px-6 py-4">會員姓名</th>
+            <th className="px-6 py-4">LINE ID</th>
+            <th className="px-6 py-4">手機</th>
+            <th className="px-6 py-4">累積點數</th>
+            <th className="px-6 py-4 text-right">操作</th>
           </tr>
         </thead>
         <tbody className="divide-y">
           {[
-            { name: '王小明', line: 'user_001', phone: '0912-345-678', points: 120, records: 5 },
-            { name: '李大同', line: 'user_082', phone: '0988-123-456', points: 45, records: 2 },
-            { name: '張小雅', line: 'user_015', phone: '0977-666-333', points: 300, records: 12 },
+            { name: '王小明', line: 'user_001', phone: '0912-345-678', points: 120 },
+            { name: '李大同', line: 'user_082', phone: '0988-123-456', points: 45 },
+            { name: '張小雅', line: 'user_015', phone: '0977-666-333', points: 300 },
           ].map((m, idx) => (
             <tr key={idx} className="hover:bg-gray-50">
-              <td className="px-6 py-4 font-medium">{m.name}</td>
-              <td className="px-6 py-4 text-gray-500 font-mono text-xs">{m.line}</td>
+              <td className="px-6 py-4 font-bold text-gray-700">{m.name}</td>
+              <td className="px-6 py-4 text-gray-400 font-mono text-[10px]">{m.line}</td>
               <td className="px-6 py-4">{m.phone}</td>
-              <td className="px-6 py-4">{m.points} pt</td>
-              <td className="px-6 py-4">
-                <button className="text-[#06C755] hover:underline flex items-center gap-1">
-                  查看 {m.records} 筆記錄 <ChevronRight size={14} />
-                </button>
-              </td>
-              <td className="px-6 py-4">
+              <td className="px-6 py-4 text-green-600 font-bold">{m.points} pt</td>
+              <td className="px-6 py-4 text-right">
                 <button className="p-2 hover:bg-gray-200 rounded-lg"><MoreVertical size={16} /></button>
               </td>
             </tr>
@@ -270,41 +382,38 @@ const MemberManagement = () => (
   </div>
 );
 
-// --- 子組件：課程管理 (解決並排問題) ---
+// --- 子組件：課程管理 ---
 const CourseManagement = () => (
   <div className="space-y-6">
     <div className="flex justify-between items-center">
-      <div className="flex items-center gap-2 text-sm text-gray-500">
-        <Smartphone size={16} />
-        <span>預覽手機顯示模式：已強制開啟兩排網格佈局</span>
+      <div className="flex items-center gap-2 text-xs text-gray-400 font-bold uppercase tracking-widest">
+        <Smartphone size={16} /> Grid Layout: Mobile Dual Column
       </div>
-      <button className="bg-[#06C755] text-white px-4 py-2 rounded-lg flex items-center gap-2">
+      <button className="bg-[#06C755] text-white px-4 py-2 rounded-xl flex items-center gap-2 font-bold text-sm shadow-lg shadow-green-100">
         <Plus size={18} /> 新增活動
       </button>
     </div>
 
-    {/* 核心網格佈局：解決你提到的並排困擾 */}
     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
       {[
         { title: '基礎羽球班', time: '每週六 10:00', price: '500', slot: '剩 2 名', color: 'bg-blue-500' },
         { title: '親子體適能', time: '每週日 09:00', price: '800', slot: '剩 5 名', color: 'bg-green-500' },
         { title: '空中瑜珈', time: '每週三 19:00', price: '600', slot: '已額滿', color: 'bg-purple-500' },
-        { title: '籃球特訓營', time: '每週五 18:30', price: '1200', slot: '剩 1 名', color: 'bg-orange-500' },
       ].map((course, idx) => (
-        <div key={idx} className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden flex flex-col">
-          <div className={`h-24 ${course.color} flex items-center justify-center text-white font-bold p-4 text-center`}>
+        <div key={idx} className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden flex flex-col hover:shadow-md transition-all active:scale-95">
+          <div className={`h-20 ${course.color} flex items-center justify-center text-white font-bold p-3 text-center text-sm`}>
             {course.title}
           </div>
           <div className="p-4 flex-1 flex flex-col justify-between space-y-2">
             <div>
-              <p className="text-xs text-gray-500 font-medium">{course.time}</p>
+              <p className="text-[10px] text-gray-400 font-bold italic uppercase">{course.time}</p>
               <p className="text-sm font-bold text-gray-700 mt-1">${course.price} / 堂</p>
             </div>
             <div className="flex items-center justify-between pt-2 border-t">
-              <span className={`text-[10px] px-2 py-0.5 rounded-full ${course.slot === '已額滿' ? 'bg-red-100 text-red-600' : 'bg-green-100 text-green-600'}`}>
+              <span className={`text-[10px] px-2 py-0.5 rounded-md font-bold ${course.slot === '已額滿' ? 'bg-red-50 text-red-600' : 'bg-green-50 text-green-600'}`}>
                 {course.slot}
               </span>
-              <button className="text-gray-400 hover:text-[#06C755]"><Settings size={14} /></button>
+              <button className="text-gray-300 hover:text-[#06C755]"><Settings size={14} /></button>
             </div>
           </div>
         </div>
@@ -315,52 +424,39 @@ const CourseManagement = () => (
 
 // --- 子組件：點名核銷 ---
 const AttendanceCheckIn = () => (
-  <div className="bg-white rounded-xl shadow-sm border border-gray-100">
+  <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
     <div className="p-6 border-b flex items-center justify-between">
-      <div>
-        <h3 className="font-bold text-lg">當日活動報到清單</h3>
-        <p className="text-sm text-gray-400">日期：2025/12/30 (二)</p>
-      </div>
-      <select className="px-4 py-2 bg-gray-50 border rounded-lg text-sm outline-none">
+      <h3 className="font-bold text-lg">今日報到清單</h3>
+      <select className="px-4 py-2 bg-gray-50 border rounded-xl text-xs font-bold outline-none focus:ring-2 focus:ring-green-400">
         <option>所有活動清單</option>
         <option>基礎羽球班 (10:00)</option>
-        <option>籃球特訓營 (18:30)</option>
       </select>
     </div>
     <div className="divide-y">
       {[
         { name: '王小明', course: '基礎羽球班', time: '10:00', status: 'pending' },
         { name: '李大同', course: '基礎羽球班', time: '10:00', status: 'checked' },
-        { name: '張小雅', course: '基礎羽球班', time: '10:00', status: 'pending' },
-        { name: '陳阿強', course: '基礎羽球班', time: '10:00', status: 'absent' },
       ].map((user, idx) => (
         <div key={idx} className="p-6 flex items-center justify-between hover:bg-gray-50">
           <div className="flex items-center gap-4">
-            <div className={`w-12 h-12 rounded-xl flex items-center justify-center font-bold text-white ${
-              user.status === 'checked' ? 'bg-green-500' : user.status === 'absent' ? 'bg-red-500' : 'bg-gray-300'
+            <div className={`w-12 h-12 rounded-2xl flex items-center justify-center font-bold text-white shadow-sm ${
+              user.status === 'checked' ? 'bg-green-500' : 'bg-gray-300'
             }`}>
               {user.name.charAt(0)}
             </div>
             <div>
-              <p className="font-bold">{user.name}</p>
-              <p className="text-xs text-gray-400">{user.course} · {user.time}</p>
+              <p className="font-bold text-gray-700">{user.name}</p>
+              <p className="text-[10px] text-gray-400 uppercase font-bold">{user.course} · {user.time}</p>
             </div>
           </div>
           <div className="flex gap-2">
             {user.status === 'pending' ? (
-              <>
-                <button className="flex items-center gap-2 px-4 py-2 bg-[#06C755] text-white rounded-lg hover:bg-[#05b54c] font-medium text-sm">
-                  <UserCheck size={18} /> 按下出席報到
-                </button>
-                <button className="px-4 py-2 border border-red-200 text-red-500 rounded-lg hover:bg-red-50 text-sm">
-                  標記未到
-                </button>
-              </>
+              <button className="px-4 py-2 bg-[#06C755] text-white rounded-xl font-bold text-xs shadow-lg shadow-green-100">
+                出席報到
+              </button>
             ) : (
-              <span className={`px-4 py-2 rounded-lg text-sm font-bold ${
-                user.status === 'checked' ? 'bg-green-50 text-green-600' : 'bg-red-50 text-red-600'
-              }`}>
-                {user.status === 'checked' ? '✓ 已正式報到' : '✕ 缺席 (已記錄)'}
+              <span className="px-4 py-2 rounded-xl text-xs font-bold bg-green-50 text-green-600 border border-green-100 italic">
+                ✓ 已正式報到
               </span>
             )}
           </div>
@@ -370,43 +466,45 @@ const AttendanceCheckIn = () => (
   </div>
 );
 
-// --- 子組件：系統參數 ---
+// --- 子組件：系統參數 (Updated) ---
 const SystemSettings = () => (
-  <div className="max-w-2xl bg-white rounded-xl shadow-sm border border-gray-100 p-8 space-y-8">
+  <div className="max-w-2xl bg-white rounded-2xl shadow-sm border border-gray-100 p-8 space-y-8 animate-in slide-in-from-bottom-4 duration-500">
     <section>
       <h3 className="font-bold text-lg mb-4 flex items-center gap-2">
-        <Database size={20} className="text-blue-500" /> 資料庫連接設定 (GAS)
+        <CreditCard size={20} className="text-orange-500" /> 匯款帳號設定
+      </h3>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label className="block text-xs font-bold text-gray-400 uppercase mb-1">銀行名稱 / 代碼</label>
+          <input type="text" placeholder="例如：中國信託 (822)" className="w-full p-2 bg-gray-50 border rounded-xl outline-none focus:ring-2 focus:ring-orange-400 text-sm" />
+        </div>
+        <div>
+          <label className="block text-xs font-bold text-gray-400 uppercase mb-1">帳戶名稱</label>
+          <input type="text" placeholder="Tony 運動工作室" className="w-full p-2 bg-gray-50 border rounded-xl outline-none focus:ring-2 focus:ring-orange-400 text-sm" />
+        </div>
+        <div className="md:col-span-2">
+          <label className="block text-xs font-bold text-gray-400 uppercase mb-1">銀行帳號</label>
+          <input type="text" placeholder="123-456-789012" className="w-full p-2 bg-gray-50 border rounded-xl outline-none focus:ring-2 focus:ring-orange-400 text-sm font-mono" />
+        </div>
+      </div>
+    </section>
+
+    <div className="border-t border-gray-100"></div>
+
+    <section>
+      <h3 className="font-bold text-lg mb-4 flex items-center gap-2">
+        <Database size={20} className="text-blue-500" /> 資料庫連接 (GAS)
       </h3>
       <div className="space-y-4">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Google Sheet ID</label>
-          <input type="text" className="w-full p-2 bg-gray-50 border rounded-lg font-mono text-sm" placeholder="輸入你的試算表 ID..." />
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">GAS Web App URL</label>
-          <input type="text" className="w-full p-2 bg-gray-50 border rounded-lg font-mono text-sm" placeholder="https://script.google.com/macros/s/..." />
+          <label className="block text-xs font-bold text-gray-400 uppercase mb-1">Google Sheet ID</label>
+          <input type="text" className="w-full p-2 bg-gray-50 border rounded-xl font-mono text-xs" value="15x_UfWgE_e_pFb1rXgA9p6PEzCqdVApwmgpiKRJPQZ4" readOnly />
         </div>
       </div>
     </section>
     
-    <section>
-      <h3 className="font-bold text-lg mb-4 flex items-center gap-2">
-        <Bell size={20} className="text-yellow-500" /> 通知發送設定 (預留)
-      </h3>
-      <div className="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
-        <div>
-          <p className="font-medium">缺席自動通知</p>
-          <p className="text-xs text-gray-400">當點名標記為「未到」時，發送簡訊/LINE 給家長</p>
-        </div>
-        <div className="w-12 h-6 bg-gray-300 rounded-full relative cursor-pointer opacity-50">
-          <div className="absolute left-1 top-1 w-4 h-4 bg-white rounded-full"></div>
-        </div>
-      </div>
-      <p className="text-[10px] text-red-400 mt-2">* 此功能涉及第三方 API 費用，目前為關閉狀態。</p>
-    </section>
-
-    <button className="w-full py-3 bg-[#2c3e50] text-white rounded-xl font-bold hover:bg-[#1a252f] transition-all">
-      儲存系統參數設定
+    <button className="w-full py-4 bg-[#2c3e50] text-white rounded-2xl font-bold hover:bg-black transition-all shadow-xl shadow-gray-200">
+      儲存並同步所有系統參數
     </button>
   </div>
 );
