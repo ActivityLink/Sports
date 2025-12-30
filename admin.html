@@ -1,151 +1,330 @@
-import React, { useState, useEffect } from 'react';
-import { 
-  LayoutDashboard, 
-  Users, 
-  CalendarDays, 
-  CheckSquare, 
-  Settings, 
-  Bell, 
-  LogOut, 
-  Search, 
-  Plus,
-  ChevronRight,
-  MoreVertical,
-  UserCheck,
-  Smartphone,
-  Database,
-  Megaphone,
-  Hammer,
-  CreditCard,
-  Trash2
-} from 'lucide-react';
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SportFlow Portal | Admin</title>
+    <!-- 使用相同的外部資源載入模式：Tailwind CSS 與 Lucide 圖標 -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root { --line-green: #06C755; --line-dark: #2c3e50; --line-active: #1a252f; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; margin: 0; background-color: #f8fafc; }
+        .sidebar-active { background-color: var(--line-active); color: var(--line-green); border-left: 4px solid var(--line-green); }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .loader { border: 2px solid #f3f3f3; border-top: 2px solid var(--line-green); border-radius: 50%; width: 16px; height: 16px; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+    </style>
+</head>
+<body class="flex h-screen overflow-hidden">
 
-/**
- * SportFlow - 管理者後台 (React Preview 版本)
- * 用途：在 Canvas 視窗中即時預覽所有新功能模組
- */
-
-const App = () => {
-  const [activeTab, setActiveTab] = useState('dashboard');
-  const [isSidebarOpen, setSidebarOpen] = useState(true);
-
-  // 模擬數據
-  const stats = [
-    { label: '本月報名人數', value: '1,284', change: '+12%', icon: Users },
-    { label: '今日預約課程', value: '12', change: '正常', icon: CalendarDays },
-    { label: '點名核銷率', value: '94%', change: '+2%', icon: CheckSquare },
-  ];
-
-  const renderContent = () => {
-    switch (activeTab) {
-      case 'dashboard': return <DashboardView stats={stats} />;
-      case 'members': return <MemberManagement />;
-      case 'courses': return <CourseManagement />;
-      case 'checkin': return <AttendanceCheckIn />;
-      case 'announcements': return <AnnouncementManagement />;
-      case 'equipment': return <EquipmentManagement />;
-      case 'settings': return <SystemSettings />;
-      default: return <DashboardView stats={stats} />;
-    }
-  };
-
-  return (
-    <div className="flex h-screen bg-gray-100 text-gray-800 font-sans">
-      {/* 左側導航欄 (Sidebar) */}
-      <aside className={`${isSidebarOpen ? 'w-64' : 'w-20'} bg-[#2c3e50] text-white transition-all duration-300 flex flex-col shadow-xl z-20`}>
-        <div className="p-6 flex items-center gap-3 border-b border-gray-700">
-            <div className="w-8 h-8 bg-[#06C755] rounded-lg flex items-center justify-center font-bold text-white shadow-lg">S</div>
-            {isSidebarOpen && <span className="font-bold text-xl tracking-tighter uppercase italic">SportFlow</span>}
+    <!-- 左側側邊欄 (Sidebar) -->
+    <aside id="sidebar" class="w-64 bg-[#2c3e50] text-white flex flex-col h-full transition-all duration-300 shadow-xl z-20 shrink-0">
+        <div class="p-6 flex items-center gap-3 border-b border-gray-700">
+            <div class="w-8 h-8 bg-[#06C755] rounded-lg flex items-center justify-center font-bold text-white">S</div>
+            <span class="sidebar-text font-bold text-xl tracking-tighter uppercase italic">SportFlow</span>
         </div>
 
-        <nav className="flex-1 mt-4 overflow-y-auto no-scrollbar">
-          <NavItem icon={<LayoutDashboard size={20} />} label="數據概覽" active={activeTab === 'dashboard'} onClick={() => setActiveTab('dashboard')} collapsed={!isSidebarOpen} />
-          <NavItem icon={<Users size={20} />} label="會員管理" active={activeTab === 'members'} onClick={() => setActiveTab('members')} collapsed={!isSidebarOpen} />
-          <NavItem icon={<CalendarDays size={20} />} label="課程建置" active={activeTab === 'courses'} onClick={() => setActiveTab('courses')} collapsed={!isSidebarOpen} />
-          <NavItem icon={<CheckSquare size={20} />} label="核銷點名" active={activeTab === 'checkin'} onClick={() => setActiveTab('checkin')} collapsed={!isSidebarOpen} />
-          
-          <div className="border-t border-gray-700 my-2 mx-4"></div>
-          
-          <NavItem icon={<Megaphone size={20} className="text-amber-400" />} label="公告管理" active={activeTab === 'announcements'} onClick={() => setActiveTab('announcements')} collapsed={!isSidebarOpen} />
-          <NavItem icon={<Hammer size={20} className="text-blue-300" />} label="設備管理" active={activeTab === 'equipment'} onClick={() => setActiveTab('equipment')} collapsed={!isSidebarOpen} />
-          <NavItem icon={<Settings size={20} />} label="系統設置" active={activeTab === 'settings'} onClick={() => setActiveTab('settings')} collapsed={!isSidebarOpen} />
+        <nav class="flex-1 mt-4 overflow-y-auto no-scrollbar">
+            <a href="javascript:void(0)" onclick="switchTab('dashboard')" class="nav-item sidebar-active flex items-center gap-4 px-6 py-4" data-tab="dashboard">
+                <i data-lucide="layout-dashboard" class="w-5 h-5"></i><span class="sidebar-text">數據概覽</span>
+            </a>
+            <a href="javascript:void(0)" onclick="switchTab('members')" class="nav-item flex items-center gap-4 px-6 py-4 text-gray-400" data-tab="members">
+                <i data-lucide="users" class="w-5 h-5"></i><span class="sidebar-text">會員名冊管理</span>
+            </a>
+            
+            <div class="border-t border-gray-700 my-2 mx-4"></div>
+            
+            <!-- 新增模組按鈕 -->
+            <a href="javascript:void(0)" onclick="switchTab('announcements')" class="nav-item flex items-center gap-4 px-6 py-4 text-gray-400" data-tab="announcements">
+                <i data-lucide="megaphone" class="w-5 h-5 text-amber-400"></i><span class="sidebar-text">前台公告管理</span>
+            </a>
+            <a href="javascript:void(0)" onclick="switchTab('equipment')" class="nav-item flex items-center gap-4 px-6 py-4 text-gray-400" data-tab="equipment">
+                <i data-lucide="hammer" class="w-5 h-5 text-blue-300"></i><span class="sidebar-text">設備租用管理</span>
+            </a>
+            <a href="javascript:void(0)" onclick="switchTab('settings')" class="nav-item flex items-center gap-4 px-6 py-4 text-gray-400" data-tab="settings">
+                <i data-lucide="settings" class="w-5 h-5"></i><span class="sidebar-text">系統參數設置</span>
+            </a>
         </nav>
-      </aside>
+        <div class="p-4 border-t border-gray-700 text-[10px] text-gray-500 text-center font-bold">SPORTFLOW v2.5</div>
+    </aside>
 
-      <main className="flex-1 flex flex-col overflow-hidden relative">
-        <header className="h-16 bg-white shadow-sm flex items-center justify-between px-8 z-10 border-b">
-          <div className="flex items-center gap-4">
-            <button onClick={() => setSidebarOpen(!isSidebarOpen)} className="p-2 hover:bg-gray-100 rounded-md lg:hidden"><Smartphone size={20} /></button>
-            <h2 className="text-xl font-bold text-gray-700 uppercase italic tracking-widest">SportFlow Portal</h2>
-          </div>
-          <div className="flex items-center gap-3">
-              <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
-              <span className="text-sm font-bold text-gray-600">Tony Admin</span>
-          </div>
+    <!-- 右側主要區域 -->
+    <div class="flex-1 flex flex-col min-w-0">
+        <header class="h-16 bg-white shadow-sm flex items-center justify-between px-8 shrink-0 border-b">
+            <div class="flex items-center gap-4">
+                <button onclick="toggleSidebar()" class="p-2 hover:bg-gray-100 rounded-md lg:hidden"><i data-lucide="menu" class="w-6 h-6"></i></button>
+                <h2 id="tab-title" class="text-xl font-bold text-gray-700 italic">數據概覽</h2>
+                <div id="loading" class="hidden flex items-center gap-2 text-xs text-gray-400 italic ml-4"><div class="loader"></div> 正在連線...</div>
+            </div>
+            <div class="text-sm font-bold text-gray-600">Tony Admin</div>
         </header>
 
-        <section className="flex-1 overflow-y-auto p-4 md:p-8 bg-gray-50">
-          {renderContent()}
-        </section>
-      </main>
+        <main class="flex-1 overflow-y-auto p-4 md:p-8">
+            
+            <!-- 模組：儀表板 -->
+            <div id="dashboard" class="tab-content active space-y-6">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex items-center gap-4">
+                        <div class="p-3 bg-green-50 text-green-500 rounded-xl"><i data-lucide="users"></i></div>
+                        <div><p class="text-xs text-gray-400 font-bold uppercase">Total Members</p><h3 id="stat-members" class="text-2xl font-bold">--</h3></div>
+                    </div>
+                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex items-center gap-4">
+                        <div class="p-3 bg-blue-50 text-blue-500 rounded-xl"><i data-lucide="calendar"></i></div>
+                        <div><p class="text-xs text-gray-400 font-bold uppercase">Active Courses</p><h3 id="stat-courses" class="text-2xl font-bold">--</h3></div>
+                    </div>
+                    <button onclick="refreshDashboard()" class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex flex-col items-center justify-center gap-1 text-green-600 font-bold hover:bg-green-50">
+                        <i data-lucide="refresh-cw" class="w-5 h-5"></i><span class="text-[10px]">SYNC</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- 模組：會員列表 -->
+            <div id="members" class="tab-content">
+                <div class="bg-white rounded-2xl shadow-sm border overflow-hidden">
+                    <div class="p-6 border-b flex justify-between items-center bg-gray-50">
+                        <h3 class="font-bold">正式會員名冊</h3>
+                        <button onclick="loadMembers()" class="text-[#06C755] text-xs font-bold px-3 py-1 border border-green-200 rounded-full">刷新</button>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-sm">
+                            <thead class="bg-white border-b text-gray-400 font-bold">
+                                <tr><th class="px-6 py-4">姓名</th><th class="px-6 py-4">手機</th><th class="px-6 py-4 text-center">點數</th><th class="px-6 py-4 text-right">操作</th></tr>
+                            </thead>
+                            <tbody id="member-list" class="divide-y"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 模組：公告管理 -->
+            <div id="announcements" class="tab-content space-y-6">
+                <div class="bg-white p-6 rounded-2xl shadow-sm border">
+                    <h3 class="font-bold text-lg mb-4 text-gray-700 flex items-center gap-2"><i data-lucide="megaphone" class="w-5 h-5 text-amber-500"></i> 發布前台公告</h3>
+                    <div class="flex flex-col md:flex-row gap-4">
+                        <input type="text" id="ann-title" placeholder="輸入公告標題 (例如：元旦休息通知)" class="flex-1 p-3 bg-gray-50 border rounded-xl outline-none focus:ring-2 focus:ring-amber-400">
+                        <button onclick="addAnnouncement()" class="bg-amber-500 text-white px-8 py-3 rounded-xl font-bold">發布公告</button>
+                    </div>
+                </div>
+                <div class="bg-white rounded-2xl shadow-sm border overflow-hidden">
+                    <div class="p-4 border-b font-bold text-gray-700 bg-gray-50 text-xs uppercase tracking-widest">目前公告清單</div>
+                    <div id="ann-list" class="divide-y text-sm"></div>
+                </div>
+            </div>
+
+            <!-- 模組：設備管理 -->
+            <div id="equipment" class="tab-content space-y-6">
+                <div class="bg-white p-6 rounded-2xl shadow-sm border">
+                    <h3 class="font-bold text-lg mb-4 text-gray-700 flex items-center gap-2"><i data-lucide="hammer" class="w-5 h-5 text-blue-500"></i> 設備資產管理</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <input type="text" id="eq-name" placeholder="設備名稱 (如：羽球拍)" class="p-3 bg-gray-50 border rounded-xl outline-none text-sm">
+                        <input type="number" id="eq-fee" placeholder="租用費用 (元/次)" class="p-3 bg-gray-50 border rounded-xl outline-none text-sm">
+                        <button onclick="addEquipment()" class="bg-blue-600 text-white py-3 rounded-xl font-bold text-sm">確認新增</button>
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4" id="eq-list"></div>
+            </div>
+
+            <!-- 模組：系統參數設置 -->
+            <div id="settings" class="tab-content space-y-8">
+                <div class="max-w-2xl bg-white p-8 rounded-2xl shadow-sm border space-y-8">
+                    <section>
+                        <h3 class="font-bold text-lg text-gray-800 border-b pb-4 flex items-center gap-2"><i data-lucide="credit-card" class="text-orange-500"></i> 匯款帳號設定</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                            <div><label class="text-[10px] font-bold text-gray-400 uppercase">銀行代碼 / 名稱</label><input type="text" id="bank-name" class="w-full p-2.5 bg-gray-50 border rounded-lg text-sm mt-1 outline-none" placeholder="中國信託 (822)"></div>
+                            <div><label class="text-[10px] font-bold text-gray-400 uppercase">戶名</label><input type="text" id="bank-user" class="w-full p-2.5 bg-gray-50 border rounded-lg text-sm mt-1 outline-none" placeholder="工作室名稱"></div>
+                            <div class="md:col-span-2"><label class="text-[10px] font-bold text-gray-400 uppercase">銀行帳號</label><input type="text" id="bank-account" class="w-full p-2.5 bg-gray-50 border rounded-lg text-sm mt-1 font-mono outline-none" placeholder="123-456-789012"></div>
+                        </div>
+                    </section>
+                    
+                    <section>
+                        <h3 class="font-bold text-lg text-gray-800 border-b pb-4 flex items-center gap-2"><i data-lucide="link" class="text-blue-500"></i> API 連接設置 (GAS)</h3>
+                        <div class="mt-4">
+                            <label class="text-[10px] font-bold text-gray-400 uppercase tracking-widest italic">GAS Web App URL (/exec)</label>
+                            <input type="text" id="api-url-input" class="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl font-mono text-[10px] outline-none mt-1" placeholder="https://script.google.com/macros/s/.../exec">
+                        </div>
+                    </section>
+                    
+                    <button onclick="saveAllSettings()" class="w-full py-4 bg-[#2c3e50] text-white rounded-xl font-bold uppercase shadow-xl active:scale-95 text-sm tracking-widest">儲存所有參數設定</button>
+                </div>
+            </div>
+
+        </main>
     </div>
-  );
-};
 
-const NavItem = ({ icon, label, active, onClick, collapsed }) => (
-  <button onClick={onClick} className={`flex items-center gap-4 w-full px-6 py-4 transition-all ${active ? 'bg-[#1a252f] text-[#06C755] border-l-4 border-[#06C755]' : 'text-gray-400 hover:bg-[#34495e] hover:text-white'}`}>
-    {icon}{!collapsed && <span className="font-medium whitespace-nowrap">{label}</span>}
-  </button>
-);
+    <!-- JavaScript 業務邏輯：處理頁面切換與 API 串接 -->
+    <script>
+        let apiUrl = localStorage.getItem('sportflow_api_url') || '';
 
-const DashboardView = ({ stats }) => (
-  <div className="grid grid-cols-1 md:grid-cols-3 gap-6 animate-in fade-in duration-500">
-    {stats.map((item, idx) => (
-      <div key={idx} className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex items-center gap-4">
-        <div className="p-4 bg-green-50 text-[#06C755] rounded-2xl"><item.icon size={24} /></div>
-        <div><p className="text-xs font-bold text-gray-400 uppercase tracking-widest">{item.label}</p><h3 className="text-2xl font-bold mt-1">{item.value}</h3></div>
-      </div>
-    ))}
-  </div>
-);
+        // 初始化
+        window.onload = () => {
+            lucide.createIcons();
+            document.getElementById('api-url-input').value = apiUrl;
+            if (apiUrl) {
+                checkApiStatus();
+                refreshDashboard();
+                loadBankInfo();
+            } else {
+                switchTab('settings');
+            }
+        };
 
-const AnnouncementManagement = () => (
-  <div className="space-y-6">
-    <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-      <h3 className="text-lg font-bold mb-4 flex items-center gap-2 text-amber-500"><Megaphone size={20} /> 發布公告</h3>
-      <div className="flex gap-4"><input type="text" placeholder="公告標題..." className="flex-1 p-3 bg-gray-50 border rounded-xl outline-none" /><button className="bg-amber-500 text-white px-8 py-3 rounded-xl font-bold">發布</button></div>
-    </div>
-    <div className="bg-white rounded-2xl border overflow-hidden"><div className="p-4 bg-gray-50 font-bold text-xs uppercase tracking-widest">Active Announcements</div><div className="p-8 text-center text-gray-400 italic">正在載入公告...</div></div>
-  </div>
-);
+        function showLoading(isLoading) { document.getElementById('loading').classList.toggle('hidden', !isLoading); }
+        function checkApiStatus() { if (apiUrl) document.getElementById('api-status-dot').classList.replace('bg-red-500', 'bg-green-500'); }
 
-const EquipmentManagement = () => (
-  <div className="space-y-6">
-    <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-      <h3 className="text-lg font-bold mb-4 flex items-center gap-2 text-blue-500"><Hammer size={20} /> 設備新增</h3>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4"><input type="text" placeholder="名稱" className="p-3 bg-gray-50 border rounded-xl" /><input type="number" placeholder="費用" className="p-3 bg-gray-50 border rounded-xl" /><button className="bg-blue-600 text-white rounded-xl font-bold">新增</button></div>
-    </div>
-  </div>
-);
+        // 通用 API 通訊
+        async function apiFetch(action, params = {}) {
+            if (!apiUrl) return null;
+            showLoading(true);
+            try {
+                const query = new URLSearchParams({ action, ...params }).toString();
+                const response = await fetch(`${apiUrl}?${query}`);
+                return await response.json();
+            } catch (e) { console.error("API Error:", e); return null; } finally { showLoading(false); }
+        }
 
-const MemberManagement = () => (
-    <div className="bg-white rounded-2xl border overflow-hidden">
-        <div className="p-6 border-b flex justify-between items-center"><h3 className="font-bold">會員資料庫</h3><button className="bg-[#06C755] text-white px-4 py-2 rounded-xl text-xs font-bold">新增會員</button></div>
-        <div className="p-10 text-center text-gray-400">正在同步 Google Sheets 資料...</div>
-    </div>
-);
+        // 保存設置
+        async function saveAllSettings() {
+            apiUrl = document.getElementById('api-url-input').value.trim();
+            localStorage.setItem('sportflow_api_url', apiUrl);
+            const bankData = { bank: document.getElementById('bank-name').value, user: document.getElementById('bank-user').value, account: document.getElementById('bank-account').value };
+            const res = await apiFetch('saveBankInfo', bankData);
+            if (res && res.success) { alert('系統參數設定成功同步！'); checkApiStatus(); switchTab('dashboard'); } else { alert('儲存失敗，請檢查網址。'); }
+        }
 
-const CourseManagement = () => <div className="p-10 text-center text-gray-400 italic">課程模組載入中...</div>;
-const AttendanceCheckIn = () => <div className="p-10 text-center text-gray-400 italic">點名模組載入中...</div>;
+        async function loadBankInfo() {
+            const res = await apiFetch('getBankInfo');
+            if (res && res.success && res.data) {
+                document.getElementById('bank-name').value = res.data.bank || '';
+                document.getElementById('bank-user').value = res.data.user || '';
+                document.getElementById('bank-account').value = res.data.account || '';
+            }
+        }
 
-const SystemSettings = () => (
-  <div className="max-w-2xl bg-white p-8 rounded-2xl shadow-sm border space-y-8">
-    <section>
-      <h3 className="font-bold text-lg mb-4 flex items-center gap-2"><CreditCard size={20} className="text-orange-500" /> 匯款帳號設定</h3>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4"><input type="text" placeholder="銀行名稱" className="p-3 bg-gray-50 border rounded-xl" /><input type="text" placeholder="戶名" className="p-3 bg-gray-50 border rounded-xl" /><input type="text" placeholder="帳號" className="md:col-span-2 p-3 bg-gray-50 border rounded-xl" /></div>
-    </section>
-    <button className="w-full py-4 bg-[#2c3e50] text-white rounded-xl font-bold uppercase tracking-widest shadow-xl">儲存系統參數</button>
-  </div>
-);
+        // 資料同步
+        async function refreshDashboard() {
+            const data = await apiFetch('getStats');
+            if (data && data.success) {
+                document.getElementById('stat-members').innerText = data.stats.members + ' 位';
+                document.getElementById('stat-courses').innerText = data.stats.courses + ' 門';
+            }
+        }
 
-export default App;
+        async function loadMembers() {
+            const list = document.getElementById('member-list');
+            list.innerHTML = '<tr><td colspan="4" class="p-10 text-center italic text-gray-400">正在同步資料庫...</td></tr>';
+            const data = await apiFetch('getMembers');
+            if (!data || data.length === 0) {
+                list.innerHTML = '<tr><td colspan="4" class="p-10 text-center text-gray-400">尚無資料</td></tr>';
+            } else {
+                list.innerHTML = data.map(m => `
+                    <tr class="hover:bg-gray-50">
+                        <td class="px-6 py-4 font-bold text-gray-700">${m.name}</td>
+                        <td class="px-6 py-4 font-mono text-gray-400 text-xs">${m.phone}</td>
+                        <td class="px-6 py-4 text-center"><span class="bg-green-50 text-green-600 px-2 py-1 rounded-md font-bold text-[10px]">${m.points} pt</span></td>
+                        <td class="px-6 py-4 text-right"><button class="text-blue-500 font-bold hover:underline text-xs">詳情</button></td>
+                    </tr>
+                `).join('');
+            }
+        }
+
+        // 公告
+        async function loadAnnouncements() {
+            const list = document.getElementById('ann-list');
+            list.innerHTML = '<p class="p-8 text-center italic text-gray-400 text-xs">載入公告中...</p>';
+            const data = await apiFetch('getAnnouncements');
+            if (!data || data.length === 0) {
+                list.innerHTML = '<p class="p-8 text-center text-gray-400 text-xs">目前無公告</p>';
+            } else {
+                list.innerHTML = data.map(a => `
+                    <div class="p-4 flex justify-between items-center group hover:bg-gray-50">
+                        <div>
+                            <p class="font-bold text-gray-700 underline decoration-amber-200 decoration-2 underline-offset-4">${a.title}</p>
+                            <p class="text-[10px] text-gray-400 mt-1 font-mono">${a.date}</p>
+                        </div>
+                        <button onclick="deleteAnn('${a.id}')" class="text-gray-200 hover:text-red-400 transition-colors p-2"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                    </div>
+                `).join('');
+                lucide.createIcons();
+            }
+        }
+
+        async function addAnnouncement() {
+            const title = document.getElementById('ann-title').value.trim();
+            if (!title) return alert('請填寫標題');
+            await apiFetch('addAnnouncement', { title });
+            document.getElementById('ann-title').value = '';
+            loadAnnouncements();
+        }
+
+        async function deleteAnn(id) {
+            if (!confirm('確認刪除公告？')) return;
+            await apiFetch('deleteAnnouncement', { id });
+            loadAnnouncements();
+        }
+
+        // 設備
+        async function loadEquipment() {
+            const list = document.getElementById('eq-list');
+            list.innerHTML = '<p class="p-4 text-gray-400 italic text-sm">正在載入清單...</p>';
+            const data = await apiFetch('getEquipment');
+            if (!data || data.length === 0) {
+                list.innerHTML = '<p class="p-4 text-gray-400 text-sm italic">目前無設備</p>';
+            } else {
+                list.innerHTML = data.map(e => `
+                    <div class="bg-white p-5 rounded-2xl border flex justify-between items-center shadow-sm hover:shadow-md transition-shadow">
+                        <div>
+                            <p class="font-bold text-gray-700">${e.name}</p>
+                            <p class="text-xs text-green-600 font-bold mt-1">$${e.fee} / 次</p>
+                        </div>
+                        <button onclick="deleteEq('${e.id}')" class="text-gray-200 hover:text-red-400 p-2"><i data-lucide="trash-2" class="w-5 h-5"></i></button>
+                    </div>
+                `).join('');
+                lucide.createIcons();
+            }
+        }
+
+        async function addEquipment() {
+            const name = document.getElementById('eq-name').value.trim();
+            const fee = document.getElementById('eq-fee').value.trim();
+            if (!name || !fee) return alert('資訊不全');
+            await apiFetch('addEquipment', { name, fee });
+            document.getElementById('eq-name').value = '';
+            document.getElementById('eq-fee').value = '';
+            loadEquipment();
+        }
+
+        async function deleteEq(id) {
+            if (!confirm('確認移除設備資產？')) return;
+            await apiFetch('deleteEquipment', { id });
+            loadEquipment();
+        }
+
+        // 導航切換
+        function switchTab(id) {
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            document.querySelectorAll('.nav-item').forEach(n => {
+                n.classList.toggle('sidebar-active', n.dataset.tab === id);
+                n.classList.toggle('text-gray-400', n.dataset.tab !== id);
+            });
+            const titles = { 'dashboard': '數據概覽', 'members': '會員名冊管理', 'announcements': '前台公告管理', 'equipment': '設備租用管理', 'settings': '系統參數設置' };
+            document.getElementById('tab-title').innerText = titles[id] || 'SportFlow Portal';
+            if (id === 'dashboard') refreshDashboard();
+            if (id === 'members') loadMembers();
+            if (id === 'announcements') loadAnnouncements();
+            if (id === 'equipment') loadEquipment();
+            if (id === 'settings') loadBankInfo();
+            lucide.createIcons();
+        }
+
+        function toggleSidebar() {
+            const s = document.getElementById('sidebar');
+            s.classList.toggle('w-64'); s.classList.toggle('w-0');
+            document.querySelectorAll('.sidebar-text').forEach(t => t.classList.toggle('hidden'));
+        }
+    </script>
+</body>
+</html>
