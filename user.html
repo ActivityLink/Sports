@@ -3,62 +3,59 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Sports Island | 預約中心 V5.9</title>
-    <!-- 引入系統資源 -->
+    <title>Sports Island | 預約中心 V6.0</title>
+    <!-- 引入高對比 UI 資源 -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
-        :root { --brand-green: #06C755; --text-main: #111827; --text-muted: #6B7280; --border-color: #F3F4F6; }
+        :root { --brand-green: #06C755; --text-black: #000000; --text-sub: #111827; }
         body { 
             font-family: -apple-system, system-ui, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; 
             background-color: #FFFFFF; 
-            color: var(--text-main); 
+            color: var(--text-black); 
             -webkit-font-smoothing: antialiased;
         }
         
-        /* 隱藏內容區域，切換顯示 */
         .tab-content { display: none; }
-        .tab-content.active { display: block; animation: contentFade 0.3s ease-out; }
-        @keyframes contentFade { from { opacity: 0; } to { opacity: 1; } }
+        .tab-content.active { display: block; }
 
-        /* 滿版列表樣式：徹底去框，不擠壓 */
+        /* 滿版去框列表：高對比、不擁擠 */
         .activity-row { 
             display: flex; 
-            padding: 1.5rem 1.25rem; 
-            border-bottom: 1px solid var(--border-color); 
-            gap: 1.25rem;
-            align-items: center;
+            padding: 1rem 0.75rem; 
+            border-bottom: 1px solid #E5E7EB; 
+            gap: 1rem;
+            align-items: flex-start;
         }
-        .activity-row:active { background-color: #F9FAFB; }
+        .activity-row:active { background-color: #F3F4F6; }
 
-        /* 彈窗：底部抽屜式設計 */
+        /* 底部抽屜詳情 */
         .drawer-overlay { 
             display: none; position: fixed; inset: 0; 
-            background: rgba(0, 0, 0, 0.5); z-index: 1000; 
+            background: rgba(0, 0, 0, 0.6); z-index: 1000; 
             backdrop-filter: blur(4px); align-items: flex-end; 
         }
         .drawer-overlay.active { display: flex; }
         .drawer-sheet { 
-            background: white; border-radius: 32px 32px 0 0; width: 100%; 
-            max-height: 92vh; overflow-y: auto; 
-            animation: sheetUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            background: white; border-radius: 24px 24px 0 0; width: 100%; 
+            max-height: 90vh; overflow-y: auto; 
+            animation: sheetUp 0.3s ease-out;
             position: relative;
         }
-        .drawer-sheet::-webkit-scrollbar { display: none; }
         @keyframes sheetUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
 
-        /* 文字樣式 */
-        .title-xl { font-weight: 900; font-size: 1.4rem; letter-spacing: -0.02em; }
-        .meta-text { font-weight: 600; font-size: 0.85rem; color: var(--text-muted); }
+        /* 確保文字清晰 */
+        .bold-black { font-weight: 800; color: #000000; }
+        .sub-black { font-weight: 600; color: #111827; }
     </style>
 </head>
-<body class="pb-32">
+<body class="pb-24">
 
     <!-- Header 導覽 -->
-    <header class="sticky top-0 z-50 bg-white/95 backdrop-blur-md px-6 py-5 flex items-center justify-between border-b border-gray-100">
+    <header class="sticky top-0 z-50 bg-white border-b border-gray-200 px-5 py-4 flex items-center justify-between">
         <div class="flex items-center gap-2">
-            <div class="w-9 h-9 bg-[#06C755] rounded-xl flex items-center justify-center font-bold text-white text-xl shadow-lg shadow-green-100">S</div>
-            <h1 class="text-xl font-black italic tracking-tighter uppercase font-sans">Sports Island</h1>
+            <div class="w-8 h-8 bg-[#06C755] rounded flex items-center justify-center font-bold text-white text-lg italic">S</div>
+            <h1 class="text-lg font-black italic tracking-tighter uppercase font-sans">Sports Island</h1>
         </div>
         <div id="connectionStatus" class="w-2.5 h-2.5 rounded-full bg-green-500 shadow-[0_0_8px_#06C755]"></div>
     </header>
@@ -66,56 +63,50 @@
     <!-- 詳情 POPUP (Detail Drawer) -->
     <div id="popupDrawer" class="drawer-overlay" onclick="closePopup()">
         <div class="drawer-sheet" onclick="event.stopPropagation()">
-            <!-- 關閉把手 -->
-            <div class="w-12 h-1.5 bg-gray-200 rounded-full mx-auto my-4"></div>
+            <div class="w-12 h-1.5 bg-gray-200 rounded-full mx-auto my-3"></div>
             
-            <!-- 14: 說明圖網址 (滿版顯示) -->
-            <div class="relative w-full h-72 bg-gray-100">
+            <div class="relative w-full h-56 bg-gray-100">
                 <img id="popImg" src="" class="w-full h-full object-cover">
-                <div class="absolute top-6 right-6">
-                    <button onclick="closePopup()" class="w-10 h-10 bg-black/20 backdrop-blur-md text-white rounded-full flex items-center justify-center">
-                        <i data-lucide="x" class="w-5 h-5"></i>
-                    </button>
-                </div>
-                <div class="absolute bottom-6 left-6 flex gap-2">
-                    <span id="popLevel" class="bg-black/60 text-white text-[10px] font-black px-3 py-1 rounded-lg uppercase tracking-widest">LEVEL</span>
-                    <span id="popStatus" class="bg-[#06C755] text-white text-[10px] font-black px-3 py-1 rounded-lg uppercase tracking-widest">OPEN</span>
-                </div>
+                <button onclick="closePopup()" class="absolute top-4 right-4 w-10 h-10 bg-black/40 text-white rounded-full flex items-center justify-center">
+                    <i data-lucide="x" class="w-6 h-6"></i>
+                </button>
             </div>
             
-            <div class="p-8">
-                <!-- 1: 課程名稱 -->
-                <h3 id="popTitle" class="text-3xl font-black mb-8 leading-tight tracking-tighter text-gray-900">載入課程中...</h3>
+            <div class="p-6">
+                <div class="flex gap-2 mb-3">
+                    <span id="popLevel" class="bg-black text-white text-[10px] font-black px-2 py-1 rounded">LEVEL</span>
+                    <span id="popStatus" class="bg-[#06C755] text-white text-[10px] font-black px-2 py-1 rounded font-sans">OPEN</span>
+                </div>
                 
-                <div class="space-y-6 mb-10 border-b border-gray-50 pb-10">
-                    <div class="flex items-center gap-5">
-                        <div class="w-12 h-12 bg-red-50 text-red-500 rounded-2xl flex items-center justify-center shadow-sm"><i data-lucide="map-pin" class="w-6 h-6"></i></div>
-                        <div><p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-0.5">活動地點</p><p id="popVenue" class="font-bold text-lg">--</p></div>
+                <h3 id="popTitle" class="text-2xl font-black mb-6 text-black tracking-tight">課程名稱</h3>
+                
+                <div class="grid grid-cols-1 gap-4 mb-8">
+                    <div class="flex items-center gap-3">
+                        <i data-lucide="map-pin" class="w-5 h-5 text-red-500"></i>
+                        <span id="popVenue" class="font-bold text-black text-base">地點載入中</span>
                     </div>
-                    <div class="flex items-center gap-5">
-                        <div class="w-12 h-12 bg-blue-50 text-blue-500 rounded-2xl flex items-center justify-center shadow-sm"><i data-lucide="user" class="w-6 h-6"></i></div>
-                        <div><p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-0.5">教練</p><p id="popCoach" class="font-bold text-lg">--</p></div>
+                    <div class="flex items-center gap-3">
+                        <i data-lucide="user" class="w-5 h-5 text-blue-500"></i>
+                        <span id="popCoach" class="font-bold text-black text-base">教練名稱</span>
                     </div>
-                    <div class="flex items-center gap-5">
-                        <div class="w-12 h-12 bg-orange-50 text-orange-500 rounded-2xl flex items-center justify-center shadow-sm"><i data-lucide="calendar" class="w-6 h-6"></i></div>
-                        <div><p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-0.5">時間時段</p><p id="popTime" class="font-bold text-lg font-sans">--</p></div>
+                    <div class="flex items-center gap-3">
+                        <i data-lucide="calendar-clock" class="w-5 h-5 text-orange-500"></i>
+                        <span id="popTime" class="font-bold text-black text-base font-sans">日期時間</span>
                     </div>
                 </div>
 
-                <!-- 15: 文字簡介 (點擊才 POP 出來) -->
-                <div class="mb-12">
-                    <h4 class="text-xs font-black text-gray-300 uppercase tracking-[0.2em] mb-5 italic flex items-center gap-2 underline decoration-gray-100 decoration-2 underline-offset-4">Course Description</h4>
-                    <p id="popDesc" class="text-gray-600 leading-relaxed text-lg font-medium whitespace-pre-wrap">--</p>
+                <div class="mb-8 p-4 bg-gray-50 rounded-xl">
+                    <h4 class="text-xs font-black text-black uppercase tracking-widest mb-2 border-b pb-2 border-gray-200">詳細課程說明</h4>
+                    <p id="popDesc" class="text-black leading-relaxed text-base font-medium whitespace-pre-wrap">內容載入中...</p>
                 </div>
 
-                <!-- 底部動作欄 -->
-                <div class="flex items-center justify-between pt-6 border-t border-gray-100">
+                <div class="flex items-center justify-between pt-4 border-t border-gray-100">
                     <div>
-                        <p class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1 italic">Best Deal</p>
-                        <p id="popPrice" class="text-4xl font-black text-red-500 tracking-tighter font-sans">$ --</p>
+                        <p class="text-[10px] font-black text-black uppercase tracking-widest">預約點數</p>
+                        <p id="popPrice" class="text-3xl font-black text-red-600 font-sans tracking-tighter">$ --</p>
                     </div>
-                    <button class="bg-[#06C755] text-white px-14 py-5 rounded-[1.8rem] font-black shadow-2xl shadow-green-100 uppercase text-xl active:scale-95 transition-all">
-                        報名預約
+                    <button class="bg-[#06C755] text-white px-10 py-4 rounded-xl font-black shadow-lg uppercase text-lg active:scale-95 transition-all">
+                        立即預約
                     </button>
                 </div>
             </div>
@@ -128,86 +119,93 @@
         <!-- Tab: 首頁 (Home) -->
         <div id="pageHome" class="tab-content active">
             <!-- 滿版 Banner -->
-            <div class="relative w-full h-64 overflow-hidden mb-12">
+            <div class="relative w-full h-48 overflow-hidden shadow-sm">
                 <img src="https://aiwe.cc/wp-content/uploads/2025/12/3486bc19dc6317e16bf4f1449ec52ae4.jpg" class="w-full h-full object-cover">
-                <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent flex flex-col justify-end p-8">
-                    <h2 class="text-white text-3xl font-black italic mb-2 tracking-tighter uppercase font-sans">Sports Island Center</h2>
-                    <p class="text-green-300 text-[10px] font-bold uppercase tracking-[0.4em]">Active Life Hub</p>
+                <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent flex flex-col justify-end p-6">
+                    <h2 class="text-white text-xl font-black tracking-tighter uppercase italic">Sports Island Center</h2>
                 </div>
             </div>
             
-            <!-- 導覽：去框風格 -->
-            <div class="grid grid-cols-2 gap-px bg-gray-100 border-y border-gray-100 mb-12">
-                <button onclick="change('courses')" class="bg-white p-12 flex flex-col items-center gap-4 active:bg-gray-50 transition-all">
-                    <i data-lucide="calendar-plus" class="w-8 h-8 text-green-500"></i>
-                    <span class="font-black text-sm uppercase text-slate-800 tracking-widest">課程預約</span>
+            <!-- 導覽按鈕：縮小佔比 -->
+            <div class="grid grid-cols-2 gap-0 border-b border-gray-200">
+                <button onclick="change('courses')" class="bg-white p-5 flex items-center justify-center gap-3 active:bg-gray-50 border-r border-gray-100">
+                    <i data-lucide="calendar-plus" class="w-5 h-5 text-green-500"></i>
+                    <span class="font-black text-sm text-black">課程預約</span>
                 </button>
-                <button onclick="change('member')" class="bg-white p-12 flex flex-col items-center gap-4 active:bg-gray-50 transition-all border-l border-gray-100">
-                    <i data-lucide="user-check" class="w-8 h-8 text-blue-500"></i>
-                    <span class="font-black text-sm uppercase text-slate-800 tracking-widest">會員中心</span>
+                <button onclick="change('member')" class="bg-white p-5 flex items-center justify-center gap-3 active:bg-gray-50">
+                    <i data-lucide="user-check" class="w-5 h-5 text-blue-500"></i>
+                    <span class="font-black text-sm text-black">會員中心</span>
                 </button>
             </div>
 
-            <!-- 公告區：去框列表 -->
-            <div class="mb-12 px-6">
-                <h3 class="text-xs font-black uppercase tracking-[0.3em] text-gray-300 mb-6 italic">Latest Announcements</h3>
-                <div id="newsList" class="divide-y divide-gray-50"></div>
-            </div>
-
-            <!-- 課程區：滿版流線型 (移除說明文字) -->
-            <div class="pb-16">
-                <div class="px-6 flex items-center justify-between mb-6">
-                    <h3 class="text-xs font-black uppercase tracking-[0.3em] text-gray-300 italic">Featured Courses</h3>
-                    <button onclick="change('courses')" class="text-[10px] text-[#06C755] font-black uppercase underline underline-offset-4 tracking-tighter">View All</button>
+            <!-- 公告區：完整顯示文字 -->
+            <div class="mt-8 px-5">
+                <h3 class="text-[10px] font-black uppercase tracking-[0.2em] text-black mb-4 flex items-center gap-2 italic">
+                    <i data-lucide="megaphone" class="w-4 h-4 text-amber-500"></i> 最新公告消息
+                </h3>
+                <div id="newsList" class="divide-y divide-gray-100 border-t border-gray-100">
+                    <!-- 渲染點 -->
                 </div>
-                <div id="homeCourseList" class="divide-y divide-gray-100 border-t border-gray-100">
-                    <!-- 載入點 -->
+            </div>
+
+            <!-- 課程區 -->
+            <div class="mt-8 pb-10">
+                <div class="px-5 flex items-center justify-between mb-4">
+                    <h3 class="text-[10px] font-black uppercase tracking-[0.2em] text-black italic">近期推薦活動</h3>
+                    <button onclick="change('courses')" class="text-[10px] text-[#06C755] font-black uppercase underline underline-offset-4 tracking-tighter">顯示全部</button>
+                </div>
+                <div id="homeCourseList" class="border-t border-gray-100">
+                    <!-- 渲染點 -->
                 </div>
             </div>
         </div>
 
         <!-- Tab: 找預約 (Courses) -->
         <div id="pageCourses" class="tab-content">
-            <div class="p-6 bg-gray-50 border-b border-gray-100 mb-2 flex items-center gap-4">
-                <i data-lucide="search" class="w-6 h-6 text-gray-400"></i>
-                <input type="text" placeholder="搜尋教練、地點或活動名稱..." class="flex-1 outline-none text-xl bg-transparent font-bold">
+            <div class="p-4 bg-gray-50 border-b border-gray-200 flex items-center gap-3">
+                <i data-lucide="search" class="w-5 h-5 text-black"></i>
+                <input type="text" placeholder="搜尋課程或地點..." class="flex-1 outline-none text-base bg-transparent font-bold text-black placeholder:text-gray-400">
             </div>
-            <div id="fullCourseList" class="divide-y divide-gray-100"></div>
+            <div id="fullCourseList"></div>
         </div>
 
-        <!-- Tab: 會員專區 (Member) -->
-        <div id="pageMember" class="tab-content px-6 pt-10">
-            <div class="bg-slate-900 p-12 rounded-[3.5rem] text-white shadow-2xl relative overflow-hidden mb-12">
-                <div class="absolute -right-12 -top-12 w-64 h-64 bg-green-500/10 rounded-full blur-[80px]"></div>
-                <p class="text-[10px] text-slate-500 font-bold uppercase mb-4 tracking-[0.4em]">Membership ID</p>
-                <h2 class="text-5xl font-black italic uppercase font-sans mb-14 tracking-tighter">Tony Wang</h2>
-                <div class="grid grid-cols-2 border-t border-white/5 pt-10 gap-8">
-                    <div><p class="text-[10px] text-slate-500 font-bold uppercase mb-2 tracking-widest">Points Balance</p><p class="text-4xl font-black text-[#06C755] font-sans tracking-tighter">1,250</p></div>
-                    <div><p class="text-[10px] text-slate-500 font-bold uppercase mb-2 tracking-widest">Access Level</p><p class="text-4xl font-black text-blue-400 font-sans tracking-tighter">GOLD</p></div>
+        <!-- Tab: 會員中心 (Member) -->
+        <div id="pageMember" class="tab-content px-5 pt-6">
+            <div class="bg-black p-8 rounded-2xl text-white shadow-xl relative overflow-hidden mb-8">
+                <p class="text-[9px] text-gray-400 font-bold uppercase mb-2 tracking-widest">Tony's Member ID</p>
+                <h2 class="text-3xl font-black italic uppercase font-sans mb-8">Tony Wang</h2>
+                <div class="grid grid-cols-2 border-t border-white/20 pt-6">
+                    <div><p class="text-[10px] text-gray-400 font-bold uppercase mb-1">餘額點數</p><p class="text-2xl font-black text-[#06C755] font-sans">1,250</p></div>
+                    <div><p class="text-[10px] text-gray-400 font-bold uppercase mb-1">當前等級</p><p class="text-2xl font-black text-blue-400 font-sans">GOLD</p></div>
                 </div>
             </div>
         </div>
     </main>
 
     <!-- 底部 Tab Bar -->
-    <nav class="fixed bottom-0 inset-x-0 bg-white/95 backdrop-blur-xl border-t border-gray-100 h-24 flex items-center justify-around z-50 px-8 shadow-sm">
-        <button onclick="change('home')" id="navHome" class="flex flex-col items-center gap-1.5 nav-active transition-all"><i data-lucide="home" class="w-7 h-7"></i><span class="text-[9px] font-black uppercase tracking-widest">首頁</span></button>
-        <button onclick="change('courses')" id="navCourses" class="flex flex-col items-center gap-1.5 text-gray-300 transition-all"><i data-lucide="calendar" class="w-7 h-7"></i><span class="text-[9px] font-black uppercase tracking-widest">找預約</span></button>
-        <button onclick="change('member')" id="navMember" class="flex flex-col items-center gap-1.5 text-gray-300 transition-all"><i data-lucide="user" class="w-7 h-7"></i><span class="text-[9px] font-black uppercase tracking-widest">我的</span></button>
+    <nav class="fixed bottom-0 inset-x-0 bg-white border-t border-gray-200 h-20 flex items-center justify-around z-50">
+        <button onclick="change('home')" id="navHome" class="flex flex-col items-center gap-1 nav-active transition-all"><i data-lucide="home" class="w-6 h-6"></i><span class="text-[9px] font-black uppercase">首頁</span></button>
+        <button onclick="change('courses')" id="navCourses" class="flex flex-col items-center gap-1 text-gray-400 transition-all"><i data-lucide="calendar" class="w-6 h-6"></i><span class="text-[9px] font-black uppercase">預約</span></button>
+        <button onclick="change('member')" id="navMember" class="flex flex-col items-center gap-1 text-gray-400 transition-all"><i data-lucide="user" class="w-6 h-6"></i><span class="text-[9px] font-black uppercase">我的</span></button>
     </nav>
 
     <script>
-        // 固定的 API URL
         const API_SERVER = 'https://curly-feather-9ac5.wetw-net3.workers.dev/';
         let masterData = [];
 
         window.onload = () => { lucide.createIcons(); sync(); };
 
+        function formatTime(t) {
+            if(!t) return '--:--';
+            // 處理 GAS 可能傳來的 14:00:00 格式，強制截斷秒數
+            return t.toString().split(':').slice(0,2).join(':');
+        }
+
         function change(id) { 
             document.querySelectorAll('.tab-content').forEach(p => p.classList.remove('active')); 
             document.getElementById('page' + id.charAt(0).toUpperCase() + id.slice(1)).classList.add('active'); 
-            document.querySelectorAll('nav button').forEach(b => { b.classList.remove('nav-active'); b.classList.add('text-gray-300'); }); 
-            document.getElementById('nav' + id.charAt(0).toUpperCase() + id.slice(1)).classList.replace('text-gray-300', 'nav-active'); 
+            document.querySelectorAll('nav button').forEach(b => { b.classList.remove('nav-active'); b.classList.add('text-gray-400'); }); 
+            document.getElementById('nav' + id.charAt(0).toUpperCase() + id.slice(1)).classList.replace('text-gray-400', 'nav-active'); 
             lucide.createIcons(); window.scrollTo({ top: 0, behavior: 'smooth' }); 
         }
         
@@ -217,48 +215,38 @@
                 const anns = await annR.json(); const crs = await crsR.json();
                 masterData = crs;
                 
-                // 公告 (極簡列表)
+                // 公告：完整文字顯示，移除右側時間
                 document.getElementById('newsList').innerHTML = anns.slice(0,3).reverse().map(a => `
-                    <div class="flex items-center gap-5 py-5 active:opacity-40 transition-opacity">
-                        <div class="w-1.5 h-1.5 rounded-full bg-amber-400"></div>
-                        <p class="text-lg font-bold text-slate-800 truncate flex-1 uppercase">${a.title}</p>
-                        <span class="text-[10px] text-slate-300 font-mono font-black">${a.date}</span>
+                    <div class="py-4 active:bg-gray-50 flex items-start gap-3">
+                        <div class="w-1.5 h-1.5 rounded-full bg-[#06C755] mt-2 shrink-0"></div>
+                        <p class="text-base font-bold text-black leading-snug">${a.title}</p>
                     </div>`).join('');
                 
-                /**
-                 * 旗艦清爽型列表項目
-                 * 根據 17 欄位定義：
-                 * 0:ID, 1:Name, 3:Coach, 4:Date, 6:Price, 7:EarlyPrice, 13:CoverUrl, 15:CourseDesc, 16:Venue
-                 */
                 const buildActivity = (c) => `
                     <div class="activity-row" onclick="openPopup('${c.id}')">
-                        <!-- 13: 封面圖網址 (縮圖) -->
-                        <div class="w-24 h-24 shrink-0 rounded-2xl overflow-hidden bg-gray-50 relative border border-gray-100 shadow-sm">
+                        <div class="w-24 h-24 shrink-0 rounded-lg overflow-hidden bg-gray-100 border border-gray-100">
                             <img src="${c.coverUrl || 'https://via.placeholder.com/300'}" class="w-full h-full object-cover">
                         </div>
 
-                        <!-- 資訊展示區 (不再擠壓) -->
-                        <div class="flex-1 min-w-0 flex flex-col justify-between">
+                        <div class="flex-1 min-w-0 flex flex-col justify-between self-stretch">
                             <div>
-                                <h4 class="font-black text-gray-900 text-xl truncate uppercase tracking-tighter mb-1">${c.name}</h4>
-                                <!-- 16: 活動地點 -->
-                                <div class="flex items-center gap-1.5 text-xs text-red-500 font-bold uppercase mb-1 italic">
-                                    <i data-lucide="map-pin" class="w-3 h-3"></i> ${c.venue || '球場地點未定'}
+                                <h4 class="font-black text-black text-lg truncate uppercase mb-1">${c.name}</h4>
+                                <div class="flex items-center gap-1 text-sm font-bold text-red-600 mb-1 italic">
+                                    <i data-lucide="map-pin" class="w-3.5 h-3.5"></i> ${c.venue || '地點未定'}
                                 </div>
-                                <div class="flex items-center gap-3 text-[10px] text-slate-400 font-bold uppercase font-sans">
-                                    <span class="flex items-center gap-1.5"><i data-lucide="user" class="w-3 h-3 text-blue-400"></i> ${c.coach}</span>
-                                    <span>${c.date}</span>
+                                <div class="text-[11px] font-black text-black uppercase font-sans">
+                                    ${c.coach} | ${c.date} ${formatTime(c.time)}
                                 </div>
                             </div>
 
-                            <div class="flex items-center justify-between mt-3">
+                            <div class="flex items-center justify-between mt-2">
                                 <div class="flex items-baseline gap-2">
-                                    <span class="text-[10px] text-gray-300 line-through font-black">$${c.price}</span>
-                                    <span class="text-2xl font-black text-red-500 tracking-tighter font-sans">$${c.earlyPrice || c.price}</span>
+                                    <span class="text-[10px] text-black/40 line-through font-black">$${c.price}</span>
+                                    <span class="text-2xl font-black text-red-600 font-sans tracking-tighter">$${c.earlyPrice || c.price}</span>
                                 </div>
-                                <div class="flex gap-4">
-                                    <button onclick="event.stopPropagation(); openPopup('${c.id}')" class="text-[11px] font-black text-blue-500 underline uppercase tracking-widest py-2">詳細說明</button>
-                                    <button class="bg-[#06C755] text-white px-7 py-2.5 rounded-2xl text-xs font-black shadow-lg shadow-green-100 uppercase active:scale-90 transition-all">預約</button>
+                                <div class="flex items-center gap-3">
+                                    <button onclick="event.stopPropagation(); openPopup('${c.id}')" class="text-[11px] font-black text-blue-600 underline uppercase py-2">詳細說明</button>
+                                    <button class="bg-[#06C755] text-white px-6 py-2 rounded-lg text-xs font-black shadow-md uppercase active:scale-90 transition-all">預約</button>
                                 </div>
                             </div>
                         </div>
@@ -267,27 +255,21 @@
                 document.getElementById('homeCourseList').innerHTML = crs.slice(0,5).map(c => buildActivity(c)).join('');
                 document.getElementById('fullCourseList').innerHTML = crs.map(c => buildActivity(c)).join(''); 
                 lucide.createIcons();
-            } catch(e) { console.error("同步失敗", e); }
+            } catch(e) { console.error("Sync Error", e); }
         }
 
-        // --- 詳細說明 POPUP 引擎 ---
         function openPopup(id) {
-            const course = masterData.find(x => x.id === id); 
-            if(!course) return;
-
-            // 14: 說明圖網址
-            document.getElementById('popImg').src = course.descImgUrl || course.coverUrl || 'https://via.placeholder.com/600';
-            document.getElementById('popTitle').innerText = course.name;
-            document.getElementById('popLevel').innerText = course.levelReq;
-            document.getElementById('popStatus').innerText = course.status || 'OPEN';
-            // 16: 活動地點
-            document.getElementById('popVenue').innerText = course.venue || '球場地點';
-            document.getElementById('popCoach').innerText = course.coach || '專業教練';
-            document.getElementById('popTime').innerText = `${course.date} | ${course.time || '14:00 - 16:00'}`;
-            // 15: 文字簡介 (此處才顯示)
-            document.getElementById('popDesc').innerText = course.courseDesc || '目前尚無詳細說明。';
-            document.getElementById('popPrice').innerText = `$${course.earlyPrice || course.price}`;
-
+            const c = masterData.find(x => x.id === id); 
+            if(!c) return;
+            document.getElementById('popImg').src = c.descImgUrl || c.coverUrl || 'https://via.placeholder.com/600';
+            document.getElementById('popTitle').innerText = c.name;
+            document.getElementById('popLevel').innerText = c.levelReq;
+            document.getElementById('popStatus').innerText = c.status || 'OPEN';
+            document.getElementById('popVenue').innerText = c.venue || '球場地點';
+            document.getElementById('popCoach').innerText = c.coach || '專業教練';
+            document.getElementById('popTime').innerText = `${c.date} ${formatTime(c.time)}`;
+            document.getElementById('popDesc').innerText = c.courseDesc || '目前尚無詳細說明。';
+            document.getElementById('popPrice').innerText = `$${c.earlyPrice || c.price}`;
             document.getElementById('popupDrawer').classList.add('active');
             lucide.createIcons();
         }
