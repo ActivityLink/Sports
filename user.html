@@ -22,8 +22,9 @@
         /* 自定義捲軸 */
         .no-scrollbar::-webkit-scrollbar { display: none; }
         
-        /* 卡片懸浮效果 */
-        .course-card:active { transform: scale(0.98); transition: 0.2s; }
+        /* 橫式列表卡片效果 */
+        .course-horizontal-card { transition: all 0.2s; }
+        .course-horizontal-card:active { background-color: #f1f5f9; transform: scale(0.98); }
     </style>
 </head>
 <body class="pb-24">
@@ -32,7 +33,7 @@
     <header class="glass-header sticky top-0 z-30 px-6 py-4 flex items-center justify-between border-b border-gray-100">
         <div class="flex items-center gap-2">
             <div class="w-8 h-8 bg-[#06C755] rounded-lg flex items-center justify-center font-bold text-white shadow-sm">S</div>
-            <h1 class="text-xl font-black italic tracking-tighter text-gray-800">SportFlow</h1>
+            <h1 class="text-xl font-black italic tracking-tighter text-gray-800 uppercase">SportFlow</h1>
         </div>
         <div class="flex items-center gap-4">
             <button class="relative p-2 text-gray-400"><i data-lucide="bell" class="w-6 h-6"></i><span class="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full"></span></button>
@@ -44,27 +45,27 @@
 
     <!-- 主 Banner 區塊：專區導航 -->
     <section class="p-6">
-        <div class="relative w-full h-48 rounded-3xl overflow-hidden shadow-2xl mb-8">
+        <div class="relative w-full h-40 rounded-3xl overflow-hidden shadow-xl mb-6">
             <img src="https://images.unsplash.com/photo-1521503862198-2ae9a997bbc9?auto=format&fit=crop&q=80&w=800" class="w-full h-full object-cover brightness-75">
             <div class="absolute inset-0 flex flex-col justify-center px-8">
-                <h2 class="text-white text-3xl font-black italic mb-2 tracking-tighter">探索你的運動極限</h2>
-                <p class="text-green-300 text-sm font-bold uppercase tracking-widest">SportFlow Portal V1.0</p>
+                <h2 class="text-white text-2xl font-black italic mb-1 tracking-tighter">探索你的運動極限</h2>
+                <p class="text-green-300 text-[10px] font-bold uppercase tracking-[0.2em]">Live Your Best Life</p>
             </div>
         </div>
 
-        <!-- 專區按鈕選單 (Tony 要求) -->
+        <!-- 專區按鈕選單 -->
         <div class="grid grid-cols-2 gap-4">
-            <button onclick="switchPage('courses')" class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex flex-col items-center gap-3 hover:shadow-md transition-all active:scale-95">
-                <div class="w-12 h-12 bg-green-50 text-green-500 rounded-full flex items-center justify-center">
-                    <i data-lucide="calendar" class="w-6 h-6"></i>
+            <button onclick="switchPage('courses')" class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 flex flex-col items-center gap-2 hover:shadow-md transition-all active:scale-95">
+                <div class="w-10 h-10 bg-green-50 text-green-500 rounded-full flex items-center justify-center">
+                    <i data-lucide="calendar" class="w-5 h-5"></i>
                 </div>
-                <span class="font-bold text-gray-700">課程專區</span>
+                <span class="font-bold text-sm text-gray-700">課程專區</span>
             </button>
-            <button onclick="switchPage('member')" class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex flex-col items-center gap-3 hover:shadow-md transition-all active:scale-95">
-                <div class="w-12 h-12 bg-blue-50 text-blue-500 rounded-full flex items-center justify-center">
-                    <i data-lucide="user" class="w-6 h-6"></i>
+            <button onclick="switchPage('member')" class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 flex flex-col items-center gap-2 hover:shadow-md transition-all active:scale-95">
+                <div class="w-10 h-10 bg-blue-50 text-blue-500 rounded-full flex items-center justify-center">
+                    <i data-lucide="user" class="w-5 h-5"></i>
                 </div>
-                <span class="font-bold text-gray-700">會員專區</span>
+                <span class="font-bold text-sm text-gray-700">會員專區</span>
             </button>
         </div>
     </section>
@@ -74,175 +75,138 @@
         
         <!-- 首頁精選 (Home) -->
         <div id="page-home" class="tab-content active px-6 space-y-6">
-            <div class="flex items-center justify-between mb-4">
-                <h3 class="text-lg font-black text-gray-800 border-l-4 border-[#06C755] pl-3 italic uppercase">熱門推薦</h3>
-                <button class="text-sm text-[#06C755] font-bold" onclick="switchPage('courses')">查看全部</button>
+            <div class="flex items-center justify-between mb-2">
+                <h3 class="text-base font-black text-gray-800 border-l-4 border-[#06C755] pl-3 italic uppercase tracking-widest">精選推薦</h3>
+                <button class="text-xs text-[#06C755] font-bold" onclick="switchPage('courses')">查看更多</button>
             </div>
             <div id="featured-list" class="flex gap-4 overflow-x-auto no-scrollbar pb-4">
-                <!-- 預設範例卡片 -->
-                <div class="min-w-[260px] bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100">
-                    <img src="https://images.unsplash.com/photo-1626224484214-4051d0cbc71a?auto=format&fit=crop&q=80&w=400" class="w-full h-32 object-cover">
-                    <div class="p-4">
-                        <span class="bg-green-100 text-green-700 text-[10px] px-2 py-0.5 rounded font-bold uppercase">初級</span>
-                        <h4 class="font-bold text-gray-800 mt-1">羽球基礎體驗課</h4>
-                        <p class="text-xs text-gray-400 mt-1">Coach Tony | $400</p>
+                <!-- 精選依然保留卡片橫向捲動 -->
+                <div class="min-w-[200px] bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100">
+                    <img src="https://images.unsplash.com/photo-1626224484214-4051d0cbc71a?auto=format&fit=crop&q=80&w=400" class="w-full h-24 object-cover">
+                    <div class="p-3">
+                        <span class="text-[9px] text-green-600 font-black uppercase tracking-tighter">新手推薦</span>
+                        <h4 class="font-bold text-gray-800 text-sm truncate">基礎羽球班</h4>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- 課程專區 (Courses) -->
+        <!-- 課程專區 (Courses) - 修改為橫向長條型 -->
         <div id="page-courses" class="tab-content px-6 space-y-6">
-            <div class="flex items-center gap-4 bg-white p-3 rounded-2xl shadow-sm border border-gray-100">
-                <i data-lucide="search" class="w-5 h-5 text-gray-400 ml-2"></i>
-                <input type="text" placeholder="搜尋感興趣的課程..." class="flex-1 text-sm outline-none">
+            <div class="flex items-center gap-3 bg-white px-4 py-3 rounded-2xl shadow-sm border border-gray-100">
+                <i data-lucide="search" class="w-4 h-4 text-gray-400"></i>
+                <input type="text" placeholder="搜尋課程或教練名稱..." class="flex-1 text-sm outline-none bg-transparent">
             </div>
+            
+            <!-- 課程清單容器 -->
             <div id="full-course-list" class="space-y-4">
-                <!-- 動態載入課程清單 -->
-                <p class="text-center text-gray-400 py-10 italic">正在載入最新課表...</p>
+                <p class="text-center text-gray-400 py-10 text-sm italic">同步雲端課表中...</p>
             </div>
         </div>
 
         <!-- 會員專區 (Member) -->
         <div id="page-member" class="tab-content px-6 space-y-6">
-            <!-- 個人資訊卡 -->
             <div class="bg-gradient-to-br from-[#2c3e50] to-[#1a252f] p-8 rounded-3xl text-white shadow-xl relative overflow-hidden">
                 <div class="absolute -right-4 -top-4 w-24 h-24 bg-white/10 rounded-full blur-2xl"></div>
-                <div class="relative z-10">
-                    <p class="text-xs text-gray-400 font-bold uppercase tracking-widest mb-1">My Membership</p>
-                    <h2 class="text-2xl font-black tracking-tighter mb-6">Tony Wang</h2>
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <p class="text-[10px] text-gray-400 uppercase font-bold">點數餘額</p>
-                            <p class="text-2xl font-black text-[#06C755]">1,250 <small class="text-xs">PT</small></p>
-                        </div>
-                        <div>
-                            <p class="text-[10px] text-gray-400 uppercase font-bold">會員等級</p>
-                            <p class="text-2xl font-black text-blue-400">進階會員</p>
-                        </div>
+                <p class="text-[10px] text-gray-400 font-bold uppercase tracking-[0.2em] mb-1">SportFlow Member</p>
+                <h2 class="text-2xl font-black tracking-tight mb-6">Tony Wang</h2>
+                <div class="grid grid-cols-2 gap-4 border-t border-white/10 pt-4">
+                    <div>
+                        <p class="text-[9px] text-gray-500 uppercase font-black tracking-widest">點數餘額</p>
+                        <p class="text-xl font-black text-[#06C755]">1,250 <small class="text-[10px]">PT</small></p>
+                    </div>
+                    <div>
+                        <p class="text-[9px] text-gray-500 uppercase font-black tracking-widest">當前等級</p>
+                        <p class="text-xl font-black text-blue-400 uppercase tracking-tighter">Gold</p>
                     </div>
                 </div>
             </div>
 
-            <!-- 選單列表 -->
-            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-                <button class="w-full p-5 flex items-center justify-between border-b border-gray-50 hover:bg-gray-50 active:scale-95 transition-all">
-                    <div class="flex items-center gap-4">
-                        <div class="w-10 h-10 bg-orange-50 text-orange-500 rounded-full flex items-center justify-center"><i data-lucide="history" class="w-5 h-5"></i></div>
-                        <span class="font-bold text-gray-700">我的預約紀錄</span>
-                    </div>
-                    <i data-lucide="chevron-right" class="w-5 h-5 text-gray-300"></i>
-                </button>
-                <button class="w-full p-5 flex items-center justify-between border-b border-gray-50 hover:bg-gray-50">
-                    <div class="flex items-center gap-4">
-                        <div class="w-10 h-10 bg-purple-50 text-purple-500 rounded-full flex items-center justify-center"><i data-lucide="credit-card" class="w-5 h-5"></i></div>
-                        <span class="font-bold text-gray-700">儲值紀錄</span>
-                    </div>
-                    <i data-lucide="chevron-right" class="w-5 h-5 text-gray-300"></i>
-                </button>
-                <button class="w-full p-5 flex items-center justify-between hover:bg-gray-50">
-                    <div class="flex items-center gap-4">
-                        <div class="w-10 h-10 bg-red-50 text-red-500 rounded-full flex items-center justify-center"><i data-lucide="log-out" class="w-5 h-5"></i></div>
-                        <span class="font-bold text-gray-700 text-red-500">登出帳號</span>
-                    </div>
-                </button>
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden divide-y divide-gray-50 text-sm font-bold text-gray-700">
+                <button class="w-full p-5 flex items-center justify-between hover:bg-gray-50"><span class="flex items-center gap-3"><i data-lucide="history" class="w-4 h-4 text-orange-500"></i>我的預約</span><i data-lucide="chevron-right" class="w-4 h-4 text-gray-300"></i></button>
+                <button class="w-full p-5 flex items-center justify-between hover:bg-gray-50"><span class="flex items-center gap-3"><i data-lucide="credit-card" class="w-4 h-4 text-purple-500"></i>儲值紀錄</span><i data-lucide="chevron-right" class="w-4 h-4 text-gray-300"></i></button>
+                <button class="w-full p-5 flex items-center justify-between hover:bg-gray-50"><span class="flex items-center gap-3"><i data-lucide="shield-check" class="w-4 h-4 text-blue-500"></i>等級認證</span><i data-lucide="chevron-right" class="w-4 h-4 text-gray-300"></i></button>
+                <button class="w-full p-5 flex items-center justify-between text-red-500"><span class="flex items-center gap-3"><i data-lucide="log-out" class="w-4 h-4"></i>登出帳號</span></button>
             </div>
         </div>
     </main>
 
-    <!-- 底部導航欄 (LINE OA LIFF 慣用) -->
+    <!-- 底部導航欄 -->
     <nav class="fixed bottom-0 inset-x-0 bg-white border-t border-gray-200 h-20 flex items-center justify-around z-50">
         <button onclick="switchPage('home')" id="btn-home" class="flex flex-col items-center gap-1 bottom-nav-active">
-            <i data-lucide="home" class="w-6 h-6"></i>
-            <span class="text-[10px] font-bold uppercase">首頁</span>
+            <i data-lucide="home" class="w-5 h-5"></i><span class="text-[9px] font-black uppercase tracking-widest">首頁</span>
         </button>
         <button onclick="switchPage('courses')" id="btn-courses" class="flex flex-col items-center gap-1 text-gray-400">
-            <i data-lucide="calendar" class="w-6 h-6"></i>
-            <span class="text-[10px] font-bold uppercase">找課程</span>
+            <i data-lucide="calendar" class="w-5 h-5"></i><span class="text-[9px] font-black uppercase tracking-widest">找課程</span>
         </button>
         <button onclick="switchPage('member')" id="btn-member" class="flex flex-col items-center gap-1 text-gray-400">
-            <i data-lucide="user" class="w-6 h-6"></i>
-            <span class="text-[10px] font-bold uppercase">我的</span>
+            <i data-lucide="user" class="w-5 h-5"></i><span class="text-[9px] font-black uppercase tracking-widest">我的</span>
         </button>
     </nav>
 
     <!-- JavaScript 邏輯 -->
     <script>
-        // 抓取管理後台儲存的 API URL
         const apiUrl = localStorage.getItem('sportflow_api_url') || '';
 
         window.onload = () => {
             lucide.createIcons();
-            if (apiUrl) {
-                loadCourses();
-            } else {
-                renderMockCourses();
-            }
+            if (apiUrl) loadCourses();
+            else renderMockCourses();
         };
 
-        // 分頁切換邏輯
         function switchPage(pageId) {
-            // 隱藏所有頁面
             document.querySelectorAll('.tab-content').forEach(p => p.classList.remove('active'));
-            // 顯示目標頁面
             document.getElementById('page-' + pageId).classList.add('active');
-            
-            // 更新底部按鈕顏色
             document.querySelectorAll('nav button').forEach(b => b.classList.replace('bottom-nav-active', 'text-gray-400'));
-            const activeBtn = document.getElementById('btn-' + pageId);
-            if(activeBtn) {
-                activeBtn.classList.replace('text-gray-400', 'bottom-nav-active');
-            }
-
-            // 更新頂部標題
-            const titles = { 'home': '數據概覽', 'courses': '課程專區', 'member': '會員中心' };
-            document.getElementById('tab-title').innerText = titles[pageId];
-            
+            document.getElementById('btn-' + pageId).classList.replace('text-gray-400', 'bottom-nav-active');
             lucide.createIcons();
             window.scrollTo(0, 0);
         }
 
-        // 從 GAS 獲取課程資料
         async function loadCourses() {
             try {
                 const response = await fetch(`${apiUrl}?action=getCourses`);
                 const data = await response.json();
-                if (data && data.length > 0) {
-                    renderCourseList(data);
-                } else {
-                    renderMockCourses();
-                }
-            } catch (e) {
-                console.error("API 連線失敗，顯示範例資料。");
-                renderMockCourses();
-            }
+                if (data && data.length > 0) renderCourseList(data);
+                else renderMockCourses();
+            } catch (e) { renderMockCourses(); }
         }
 
-        // 渲染課程卡片
+        // 修改重點：橫向列表渲染邏輯
         function renderCourseList(data) {
             const listContainer = document.getElementById('full-course-list');
             listContainer.innerHTML = data.map(course => `
-                <div class="course-card bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100 flex flex-col gap-0">
-                    <div class="relative h-40">
-                        <img src="${course.coverUrl || 'https://via.placeholder.com/600x400?text=No+Image'}" class="w-full h-full object-cover">
-                        <div class="absolute top-3 left-3 bg-white/90 backdrop-blur px-2 py-1 rounded text-[10px] font-black text-[#06C755] uppercase shadow-sm">
+                <div class="course-horizontal-card bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100 flex h-32">
+                    <!-- 左側：縮圖 -->
+                    <div class="w-28 shrink-0 relative">
+                        <img src="${course.coverUrl || 'https://via.placeholder.com/200x200?text=Sport'}" class="w-full h-full object-cover">
+                        <div class="absolute top-0 left-0 bg-[#06C755] text-white text-[8px] font-black px-2 py-0.5 rounded-br-lg uppercase tracking-tighter">
                             ${course.levelReq}
                         </div>
                     </div>
-                    <div class="p-5 space-y-3">
-                        <div class="flex justify-between items-start">
-                            <h4 class="text-lg font-black text-gray-800 tracking-tighter">${course.name}</h4>
-                            <div class="text-right">
-                                <p class="text-[10px] text-gray-400 line-through font-bold">$${course.price}</p>
-                                <p class="text-lg font-black text-red-500">$${course.earlyPrice || course.price}</p>
-                            </div>
+
+                    <!-- 中間：簡介 -->
+                    <div class="flex-1 p-3 flex flex-col justify-center min-w-0">
+                        <h4 class="font-black text-gray-800 text-sm truncate uppercase tracking-tighter mb-1">${course.name}</h4>
+                        <div class="flex items-center gap-2 text-[10px] text-gray-400 font-bold mb-1">
+                            <i data-lucide="user" class="w-3 h-3 text-blue-400"></i> ${course.coach}
                         </div>
-                        <div class="flex items-center gap-4 text-xs text-gray-400 font-medium">
-                            <div class="flex items-center gap-1"><i data-lucide="clock" class="w-3 h-3"></i> ${course.date}</div>
-                            <div class="flex items-center gap-1"><i data-lucide="user" class="w-3 h-3"></i> ${course.coach}</div>
+                        <div class="flex items-center gap-2 text-[10px] text-gray-400 font-bold">
+                            <i data-lucide="clock" class="w-3 h-3 text-orange-400"></i> ${course.date}
                         </div>
-                        <button class="w-full py-3 bg-[#06C755] text-white rounded-xl font-bold uppercase tracking-widest shadow-lg shadow-green-100">
-                            立即預約報名
+                    </div>
+
+                    <!-- 右側：詳細說明與預約 -->
+                    <div class="w-24 border-l border-gray-50 p-3 flex flex-col justify-between items-center bg-gray-50/30">
+                        <div class="text-center">
+                            <p class="text-[9px] text-gray-400 line-through font-bold leading-none">$${course.price}</p>
+                            <p class="text-sm font-black text-red-500 leading-tight">$${course.earlyPrice || course.price}</p>
+                        </div>
+                        <button onclick="showDetails('${course.id}')" class="text-[9px] font-black text-[#06C755] underline uppercase tracking-tighter mb-1">
+                            詳細說明
+                        </button>
+                        <button class="w-full py-1.5 bg-[#06C755] text-white rounded-lg text-[10px] font-black shadow-sm uppercase active:scale-90 transition-transform">
+                            預約
                         </button>
                     </div>
                 </div>
@@ -250,13 +214,18 @@
             lucide.createIcons();
         }
 
-        // 範例資料 (用於預覽)
         function renderMockCourses() {
             const mock = [
-                { name: '進階羽球戰術班', levelReq: '進階', coach: 'Tony', price: 800, earlyPrice: 600, date: '2026-01-15', coverUrl: 'https://images.unsplash.com/photo-1511067007398-7e4b90cfa4bc?auto=format&fit=crop&q=80&w=400' },
-                { name: '週末瑜珈舒展', levelReq: '初級', coach: 'Linda', price: 500, earlyPrice: 400, date: '2026-01-16', coverUrl: 'https://images.unsplash.com/photo-1506126613408-eca07ce68773?auto=format&fit=crop&q=80&w=400' }
+                { id: 'm1', name: '基礎羽球推廣課', levelReq: '初級', coach: 'Coach Tony', price: 500, earlyPrice: 400, date: '12/31 14:00', coverUrl: 'https://images.unsplash.com/photo-1626224484214-4051d0cbc71a?auto=format&fit=crop&q=80&w=200' },
+                { id: 'm2', name: '進階戰術班 (A)', levelReq: '進階', coach: 'Coach Kevin', price: 800, earlyPrice: 650, date: '01/05 19:00', coverUrl: 'https://images.unsplash.com/photo-1511067007398-7e4b90cfa4bc?auto=format&fit=crop&q=80&w=200' },
+                { id: 'm3', name: '週末瑜珈舒展班', levelReq: '初級', coach: 'Linda', price: 400, earlyPrice: 300, date: '01/06 10:00', coverUrl: 'https://images.unsplash.com/photo-1506126613408-eca07ce68773?auto=format&fit=crop&q=80&w=200' }
             ];
             renderCourseList(mock);
+        }
+
+        function showDetails(id) {
+            // 未來實作開啟詳細說明彈窗或頁面
+            alert('正在跳轉至詳細說明 (ID: ' + id + ')');
         }
     </script>
 </body>
