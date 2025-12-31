@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sports Island | Admin Portal V4.4</title>
+    <title>Sports Island | 管理後台 V4.4</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
@@ -15,25 +15,22 @@
         aside { transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
         .sidebar-text { transition: opacity 0.2s; white-space: nowrap; }
         .collapsed .sidebar-text { opacity: 0; display: none; }
-        .collapsed .nav-item { justify-content: center; padding-left: 0; padding-right: 0; }
         .img-preview { width: 100%; height: 160px; object-fit: cover; border-radius: 12px; background-color: #e2e8f0; display: flex; align-items: center; justify-content: center; }
-        .edit-mode { border: 3px solid #fbbf24; background-color: #fffbeb; }
+        .edit-mode { border: 2px solid #fbbf24; background-color: #fffbeb; }
         .no-scrollbar::-webkit-scrollbar { display: none; }
-        .btn-active:active { transform: scale(0.98); opacity: 0.9; }
         .loader { border: 3px solid #f3f3f3; border-top: 3px solid var(--line-green); border-radius: 50%; width: 20px; height: 20px; animation: spin 1s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
 <body class="flex h-screen overflow-hidden text-slate-800 font-sans">
 
-    <!-- Sidebar -->
     <aside id="appSidebar" class="w-64 bg-[#0f172a] text-white flex flex-col h-full shadow-xl z-20 shrink-0 transition-all duration-300">
         <div class="sidebar-header p-8 flex items-center gap-4 border-b border-slate-800">
-            <div class="w-12 h-12 bg-[#06C755] rounded-xl flex items-center justify-center font-bold text-white shadow-lg text-3xl font-sans">S</div>
+            <div class="w-12 h-12 bg-[#06C755] rounded-xl flex items-center justify-center font-bold text-white shadow-lg text-3xl shrink-0 font-sans">S</div>
             <span class="sidebar-text font-black text-2xl tracking-tighter uppercase italic">Sports Island</span>
         </div>
         <nav class="flex-1 mt-6 overflow-y-auto no-scrollbar">
-            <a href="javascript:void(0)" onclick="switchTab('dashboard')" class="nav-item nav-active flex items-center gap-4 px-8 py-5" data-tab="dashboard"><i data-lucide="layout-dashboard" class="w-6 h-6"></i><span class="sidebar-text font-bold">數據概覽</span></a>
+            <a href="javascript:void(0)" onclick="switchTab('dashboard')" class="nav-item nav-active flex items-center gap-4 px-8 py-5 transition-all" data-tab="dashboard"><i data-lucide="layout-dashboard" class="w-6 h-6"></i><span class="sidebar-text font-bold">數據概覽</span></a>
             <a href="javascript:void(0)" onclick="switchTab('members')" class="nav-item flex items-center gap-4 px-8 py-5 text-slate-400" data-tab="members"><i data-lucide="users" class="w-6 h-6"></i><span class="sidebar-text font-bold">會員名冊</span></a>
             <a href="javascript:void(0)" onclick="switchTab('courses')" class="nav-item flex items-center gap-4 px-8 py-5 text-slate-400" data-tab="courses"><i data-lucide="calendar" class="w-6 h-6"></i><span class="sidebar-text font-bold">課程建置</span></a>
             <a href="javascript:void(0)" onclick="switchTab('announcements')" class="nav-item flex items-center gap-4 px-8 py-5 text-slate-400" data-tab="announcements"><i data-lucide="megaphone" class="w-6 h-6"></i><span class="sidebar-text font-bold">公告管理</span></a>
@@ -41,235 +38,131 @@
             <div class="border-t border-slate-800 my-6 mx-6"></div>
             <a href="javascript:void(0)" onclick="switchTab('settings')" class="nav-item flex items-center gap-4 px-8 py-5 text-slate-400" data-tab="settings"><i data-lucide="settings" class="w-6 h-6"></i><span class="sidebar-text font-bold">系統設置</span></a>
         </nav>
-        <div class="p-6 border-t border-slate-800 text-[10px] text-slate-500 text-center font-black uppercase tracking-widest bg-slate-900/50">V4.4 Admin</div>
+        <div class="p-6 border-t border-slate-800 text-[10px] text-slate-500 text-center font-black bg-slate-900/50 uppercase">V4.4 Admin</div>
     </aside>
 
-    <!-- Main Workspace -->
     <div class="flex-1 flex flex-col min-w-0 relative">
         <header class="h-24 bg-white shadow-sm flex items-center justify-between px-10 border-b">
             <div class="flex items-center gap-8">
-                <button onclick="toggleSidebar()" class="p-3 hover:bg-slate-100 rounded-xl text-slate-500 btn-active"><i data-lucide="menu" class="w-8 h-8"></i></button>
+                <button onclick="toggleSidebar()" class="p-3 hover:bg-slate-100 rounded-xl text-slate-500"><i data-lucide="menu" class="w-8 h-8"></i></button>
                 <h2 id="tabTitle" class="text-3xl font-black text-slate-800 tracking-tight uppercase italic font-sans">數據概覽</h2>
-                <div id="loadingIndicator" class="hidden flex items-center gap-3 text-base text-green-600 font-bold bg-green-50 px-4 py-2 rounded-full"><div class="loader"></div> <span class="animate-pulse">資料同步中...</span></div>
+                <div id="loadingIndicator" class="hidden flex items-center gap-3 text-base text-green-600 font-bold bg-green-50 px-4 py-2 rounded-full"><div class="loader"></div> <span class="animate-pulse">同步中...</span></div>
             </div>
             <div id="apiStatusDot" class="w-4 h-4 rounded-full bg-red-500 shadow-sm animate-pulse mr-8"></div>
         </header>
 
-        <main id="mainScrollContainer" class="flex-1 overflow-y-auto p-10 md:p-14">
+        <main id="mainArea" class="flex-1 overflow-y-auto p-10 md:p-14">
             
-            <!-- Dashboard View -->
+            <!-- Dashboard -->
             <div id="tabDashboard" class="tab-content active space-y-10">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-10">
-                    <div class="bg-white p-10 rounded-3xl shadow-sm border flex items-center gap-8 transition-transform hover:scale-[1.02] shadow-slate-200"><div class="p-6 bg-green-50 text-green-500 rounded-2xl"><i data-lucide="users" class="w-10 h-10"></i></div><div><p class="text-sm text-slate-400 font-black uppercase">總會員人數</p><h3 id="statMembers" class="text-5xl font-black">--</h3></div></div>
-                    <div class="bg-white p-10 rounded-3xl shadow-sm border flex items-center gap-8 transition-transform hover:scale-[1.02] shadow-slate-200"><div class="p-6 bg-blue-50 text-blue-500 rounded-2xl"><i data-lucide="calendar" class="w-10 h-10"></i></div><div><p class="text-sm text-slate-400 font-black uppercase">在線活動數</p><h3 id="statCourses" class="text-5xl font-black">--</h3></div></div>
+                    <div class="bg-white p-10 rounded-3xl shadow-sm border flex items-center gap-8 transition-transform hover:scale-[1.02]"><div class="p-6 bg-green-50 text-green-500 rounded-2xl shadow-inner"><i data-lucide="users" class="w-10 h-10"></i></div><div><p class="text-sm text-slate-400 font-black uppercase">總會員人數</p><h3 id="statMembers" class="text-5xl font-black tracking-tighter">--</h3></div></div>
+                    <div class="bg-white p-10 rounded-3xl shadow-sm border flex items-center gap-8 transition-transform hover:scale-[1.02]"><div class="p-6 bg-blue-50 text-blue-500 rounded-2xl shadow-inner"><i data-lucide="calendar" class="w-10 h-10"></i></div><div><p class="text-sm text-slate-400 font-black uppercase">在線活動數</p><h3 id="statCourses" class="text-5xl font-black tracking-tighter">--</h3></div></div>
                 </div>
             </div>
 
-            <!-- Courses View (Strict 17 Fields) -->
+            <!-- Courses (Strict 17 Fields) -->
             <div id="tabCourses" class="tab-content space-y-10">
-                <div id="courseFormContainer" class="bg-white p-10 rounded-[2.5rem] shadow-xl border border-slate-200">
+                <div id="courseFormBlock" class="bg-white p-10 rounded-3xl shadow-sm border border-slate-200">
                     <div class="flex items-center justify-between mb-10 border-b pb-8">
-                        <h3 id="courseFormTitle" class="font-black text-3xl text-slate-800 flex items-center gap-4 italic uppercase tracking-tighter"><i data-lucide="plus-circle" class="w-10 h-10 text-green-500"></i> New Activity</h3>
-                        <div id="courseEditBadge" class="hidden text-sm bg-amber-100 text-amber-600 px-6 py-2 rounded-full font-black animate-pulse shadow-sm">編輯模式啟動</div>
+                        <h3 id="formTitle" class="font-black text-3xl text-slate-800 italic uppercase"><i data-lucide="plus-circle" class="w-10 h-10 text-green-500 inline mr-2"></i> New Activity</h3>
+                        <div id="editBadge" class="hidden text-sm bg-amber-100 text-amber-600 px-6 py-2 rounded-full font-black animate-pulse uppercase">Editing Mode</div>
                     </div>
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10">
-                        <input type="hidden" id="courseFieldId">
-                        <div class="lg:col-span-2"><label class="text-sm font-black text-slate-500 mb-3 block">課程標題名稱</label><input type="text" id="courseFieldName" class="w-full p-5 border rounded-2xl font-bold text-lg focus:border-green-500 transition-colors"></div>
-                        <div><label class="text-sm font-black text-slate-500 mb-3 block">等級限制</label><select id="courseFieldLevelReq" class="w-full p-5 border rounded-2xl text-lg font-bold"><option value="初級">初級</option><option value="進階">進階</option><option value="高級">高級</option></select></div>
-                        <div><label class="text-sm font-black text-slate-500 mb-3 block">課程狀態</label><select id="courseFieldStatus" class="w-full p-5 border rounded-2xl text-lg font-bold text-blue-600"><option value="Open">開放報名 (Open)</option><option value="Draft">草稿 (Draft)</option><option value="Full">額滿 (Full)</option><option value="Closed">關閉 (Closed)</option></select></div>
-                        <div class="lg:col-span-2"><label class="text-sm font-black text-slate-500 mb-3 block text-blue-600">封面圖 URL</label><input type="text" id="courseFieldCoverUrl" oninput="previewImg('cover', this.value)" class="w-full p-5 bg-slate-50 border rounded-2xl text-sm font-mono" placeholder="https://..."><div id="preCover" class="img-preview mt-4 border-dashed border-2"></div></div>
-                        <div class="lg:col-span-2"><label class="text-sm font-black text-slate-500 mb-3 block text-blue-600">內文圖 URL</label><input type="text" id="courseFieldDescImgUrl" oninput="previewImg('desc', this.value)" class="w-full p-5 bg-slate-50 border rounded-2xl text-sm font-mono" placeholder="https://..."><div id="preDesc" class="img-preview mt-4 border-dashed border-2"></div></div>
-                        <div class="lg:col-span-2"><label class="text-sm font-black text-slate-500 mb-3 block">活動地點/場館</label><input type="text" id="courseFieldVenue" placeholder="例如：中正運動中心" class="w-full p-5 border rounded-2xl font-bold text-lg"></div>
-                        <div><label class="text-sm font-black text-slate-500 mb-3 block">授課教練</label><input type="text" id="courseFieldCoach" class="w-full p-5 border rounded-2xl font-bold text-lg"></div>
-                        <div><label class="text-sm font-black text-slate-500 mb-3 block text-orange-600 uppercase">日期</label><input type="date" id="courseFieldDate" class="w-full p-5 border rounded-2xl text-lg font-bold"></div>
-                        <div><label class="text-sm font-black text-slate-500 mb-3 block text-orange-600 uppercase">時段</label><input type="text" id="courseFieldTime" placeholder="14:00-16:00" class="w-full p-5 border rounded-2xl text-lg font-bold"></div>
-                        <div><label class="text-sm font-black text-slate-500 mb-3 block">課程原價 (PT)</label><input type="number" id="courseFieldPrice" class="w-full p-5 border rounded-2xl text-xl font-black"></div>
-                        <div><label class="text-sm font-black text-red-500 mb-3 block">早鳥優惠 (PT)</label><input type="number" id="courseFieldEarlyPrice" class="w-full p-5 border-2 border-red-100 bg-red-50/20 rounded-2xl text-xl font-black text-red-600"></div>
-                        <div class="lg:col-span-2"><label class="text-sm font-black text-slate-500 mb-3 block uppercase tracking-widest">早鳥截止日期</label><input type="datetime-local" id="courseFieldEarlyDeadline" class="w-full p-5 border rounded-2xl font-bold text-lg"></div>
-                        <div><label class="text-sm font-black text-slate-500 mb-3 block uppercase">招生上限</label><input type="number" id="courseFieldSlots" class="w-full p-5 border rounded-2xl font-black text-lg"></div>
-                        <div><label class="text-sm font-black text-slate-500 mb-3 block uppercase">候補上限</label><input type="number" id="courseFieldWaitlist" class="w-full p-5 border rounded-2xl font-black text-lg"></div>
-                        <div class="lg:col-span-4"><label class="text-sm font-black text-slate-500 mb-3 block uppercase">課程詳細簡介內容</label><textarea id="courseFieldDesc" rows="4" class="w-full p-6 border rounded-3xl font-medium text-base outline-none focus:bg-white transition-all shadow-inner" placeholder="請在此輸入詳細說明..."></textarea></div>
-                        <div class="lg:col-span-4 p-8 bg-slate-50 rounded-[2rem] border border-slate-200 shadow-inner mt-4"><label class="text-sm font-black text-slate-600 mb-6 block border-b pb-4 uppercase tracking-widest"><i data-lucide="hammer" class="w-5 h-5 inline mr-2 text-blue-500"></i> 本活動連動之租借設備項目</label><div id="courseEquipSelectArea" class="flex flex-wrap gap-8"></div></div>
-                        <div class="lg:col-span-4 flex justify-end gap-6 border-t pt-10 mt-6"><button id="courseBtnCancelEdit" onclick="clearCourseForm()" class="hidden px-16 py-5 bg-slate-100 text-slate-500 font-black rounded-2xl uppercase btn-active">取消編輯</button><button onclick="processCourse()" class="bg-[#06C755] text-white px-28 py-6 rounded-2xl font-black shadow-2xl uppercase tracking-widest text-2xl btn-active">儲存並同步雲端</button></div>
+                        <input type="hidden" id="fieldId">
+                        <div class="lg:col-span-2"><label class="text-sm font-black text-slate-500 mb-3 block uppercase">活動名稱</label><input type="text" id="fieldName" class="w-full p-5 border rounded-2xl font-bold text-lg"></div>
+                        <div><label class="text-sm font-black text-slate-500 mb-3 block uppercase">要求等級</label><select id="fieldLevelReq" class="w-full p-5 border rounded-2xl text-lg font-bold"><option value="初級">初級</option><option value="進階">進階</option><option value="高級">高級</option></select></div>
+                        <div><label class="text-sm font-black text-slate-500 mb-3 block uppercase">課程狀態</label><select id="fieldStatus" class="w-full p-5 border rounded-2xl text-lg font-bold text-blue-600"><option value="Open">開放報名 (Open)</option><option value="Draft">草稿 (Draft)</option><option value="Full">已額滿 (Full)</option><option value="Closed">已結束 (Closed)</option></select></div>
+                        <div class="lg:col-span-2"><label class="text-sm font-black text-slate-500 mb-3 block text-blue-600 uppercase">封面圖 URL</label><input type="text" id="fieldCoverUrl" oninput="previewImg('cover', this.value)" class="w-full p-5 bg-slate-50 border rounded-2xl text-sm font-mono"><div id="preCover" class="img-preview mt-4 border-dashed border-2"></div></div>
+                        <div class="lg:col-span-2"><label class="text-sm font-black text-slate-500 mb-3 block text-blue-600 uppercase">說明圖 URL</label><input type="text" id="fieldDescImgUrl" oninput="previewImg('desc', this.value)" class="w-full p-5 bg-slate-50 border rounded-2xl text-sm font-mono"><div id="preDesc" class="img-preview mt-4 border-dashed border-2"></div></div>
+                        <div class="lg:col-span-2"><label class="text-sm font-black text-slate-500 mb-3 block uppercase">地點/場館</label><input type="text" id="fieldVenue" class="w-full p-5 border rounded-2xl font-bold text-lg"></div>
+                        <div><label class="text-sm font-black text-slate-500 mb-3 block uppercase">教練</label><input type="text" id="fieldCoach" class="w-full p-5 border rounded-2xl font-bold text-lg"></div>
+                        <div><label class="text-sm font-black text-slate-500 mb-3 block uppercase">日期</label><input type="date" id="fieldDate" class="w-full p-5 border rounded-2xl text-lg font-bold"></div>
+                        <div><label class="text-sm font-black text-slate-500 mb-3 block uppercase">時段</label><input type="text" id="fieldTime" placeholder="14:00-16:00" class="w-full p-5 border rounded-2xl text-lg font-bold"></div>
+                        <div><label class="text-sm font-black text-slate-500 mb-3 block uppercase">原價 (PT)</label><input type="number" id="fieldPrice" class="w-full p-5 border rounded-2xl text-xl font-black"></div>
+                        <div><label class="text-sm font-black text-red-500 mb-3 block uppercase">早鳥 (PT)</label><input type="number" id="fieldEarlyPrice" class="w-full p-5 border-2 border-red-100 bg-red-50/20 rounded-2xl text-xl font-black text-red-600"></div>
+                        <div class="lg:col-span-2"><label class="text-sm font-black text-slate-500 mb-3 block uppercase">早鳥截止</label><input type="datetime-local" id="fieldEarlyDeadline" class="w-full p-5 border rounded-2xl font-bold text-lg"></div>
+                        <div><label class="text-sm font-black text-slate-500 mb-3 block uppercase">名額</label><input type="number" id="fieldSlots" class="w-full p-5 border rounded-2xl font-black text-lg"></div>
+                        <div><label class="text-sm font-black text-slate-500 mb-3 block uppercase">候補</label><input type="number" id="fieldWaitlist" class="w-full p-5 border rounded-2xl font-black text-lg"></div>
+                        <div class="lg:col-span-4"><label class="text-sm font-black text-slate-500 mb-3 block uppercase">簡介說明</label><textarea id="fieldCourseDesc" rows="4" class="w-full p-6 border rounded-3xl font-medium text-base outline-none focus:bg-white"></textarea></div>
+                        <div class="lg:col-span-4 p-8 bg-slate-50 rounded-3xl border mt-4 shadow-inner"><label class="text-sm font-black text-slate-600 mb-6 block border-b pb-4 uppercase tracking-widest"><i data-lucide="hammer" class="w-5 h-5 inline mr-2 text-blue-500"></i> 連動設備</label><div id="equipSelectArea" class="flex flex-wrap gap-8"></div></div>
+                        <div class="lg:col-span-4 flex justify-end gap-6 border-t pt-10 mt-6"><button id="btnCancelEdit" onclick="clearCourseForm()" class="hidden px-12 py-5 bg-slate-100 text-slate-500 font-black rounded-2xl uppercase">取消編輯</button><button onclick="processCourse()" class="bg-[#06C755] text-white px-24 py-5 rounded-2xl font-black shadow-2xl uppercase tracking-widest text-xl">確認儲存</button></div>
                     </div>
                 </div>
-                <div class="bg-white rounded-3xl shadow-xl border border-slate-200 overflow-hidden"><div class="p-10 bg-slate-50 flex justify-between items-center border-b px-12"><span class="font-black text-sm text-slate-400 uppercase tracking-widest">目前開課看板 (LIVE ACTIVITY BOARD)</span><button onclick="loadCourses()" class="text-[#06C755] flex items-center gap-3 font-bold hover:scale-105 transition-transform"><i data-lucide="refresh-cw" class="w-6 h-6"></i> 刷新</button></div><div class="overflow-x-auto p-8"><table class="w-full text-left text-base"><thead class="bg-white border-b text-slate-400 font-black uppercase tracking-tighter"><tr><th class="px-10 py-6">課程內容</th><th class="px-10 py-6 text-center">價格 (原/早)</th><th class="px-10 py-6 text-right">操作</th></tr></thead><tbody id="courseListTableBody" class="divide-y text-slate-700 font-medium"></tbody></table></div></div>
+                <div class="bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden"><table class="w-full text-left text-base"><thead class="bg-slate-50 text-slate-400 font-black uppercase"><tr><th class="px-10 py-6">課程內容</th><th class="px-10 py-6 text-center">價格</th><th class="px-10 py-6 text-right">操作</th></tr></thead><tbody id="courseTableBody" class="divide-y text-slate-700"></tbody></table></div>
             </div>
 
-            <!-- Members View -->
-            <div id="tabMembers" class="tab-content"><div class="bg-white rounded-[2rem] shadow-xl border overflow-hidden"><div class="p-10 border-b bg-slate-50 flex justify-between items-center"><h3 class="font-black text-2xl uppercase italic tracking-widest">Members Global Directory</h3><button onclick="loadMembers()" class="bg-slate-900 text-white px-10 py-4 rounded-full font-black text-base btn-active uppercase tracking-widest shadow-lg shadow-slate-200">Reload Data</button></div><div class="overflow-x-auto p-4"><table class="w-full text-left"><thead class="bg-white border-b text-slate-400 font-black uppercase"><tr><th class="px-10 py-6">姓名</th><th class="px-10 py-6">手機</th><th class="px-10 py-6 text-center">點數</th><th class="px-10 py-6 text-right">管理</th></tr></thead><tbody id="memberListTableBody" class="divide-y text-slate-700"></tbody></table></div></div></div>
+            <!-- Members -->
+            <div id="tabMembers" class="tab-content"><div class="bg-white rounded-3xl shadow-sm border overflow-hidden"><div class="p-8 border-b bg-slate-50 flex justify-between items-center"><h3 class="font-black text-xl italic uppercase">Members Database</h3><button onclick="loadMembers()" class="bg-[#06C755] text-white px-8 py-3 rounded-full font-black uppercase text-sm">Reload Data</button></div><div class="overflow-x-auto"><table class="w-full text-left"><thead class="bg-white border-b text-slate-400 font-black uppercase"><tr><th class="px-10 py-6">姓名</th><th class="px-10 py-6">手機</th><th class="px-10 py-6 text-center">點數</th><th class="px-10 py-6 text-right">操作</th></tr></thead><tbody id="memberListBody" class="divide-y text-slate-700"></tbody></table></div></div></div>
 
-            <!-- Announcements View -->
-            <div id="tabAnnouncements" class="tab-content space-y-10"><div class="bg-white p-12 rounded-[2.5rem] shadow-xl border"><h3 class="font-black text-3xl mb-10 flex items-center gap-5 italic uppercase tracking-tighter"><i data-lucide="megaphone" class="text-amber-500 w-10 h-10"></i> New Notification</h3><div class="flex flex-col md:flex-row gap-8"><input type="text" id="annTitleInput" placeholder="公告標題內容..." class="flex-1 p-6 bg-slate-50 border rounded-3xl font-black text-xl outline-none focus:bg-white transition-all shadow-inner"><button onclick="addAnnouncement()" class="bg-[#06C755] text-white px-20 py-6 rounded-3xl font-black shadow-2xl uppercase active:scale-95 text-xl tracking-widest">發布公告</button></div></div><div id="annListContainer" class="bg-white rounded-[2.5rem] shadow-xl border divide-y overflow-hidden transition-all"></div></div>
+            <!-- Announcements -->
+            <div id="tabAnnouncements" class="tab-content space-y-10"><div class="bg-white p-10 rounded-3xl shadow-sm border"><h3 class="font-black text-2xl mb-8 flex items-center gap-4 italic uppercase"><i data-lucide="megaphone" class="text-amber-500 w-10 h-10"></i> New Notification</h3><div class="flex flex-col md:flex-row gap-6"><input type="text" id="annTitle" placeholder="公告標題..." class="flex-1 p-5 bg-slate-50 border rounded-2xl font-bold text-lg"><button onclick="addAnnouncement()" class="bg-[#06C755] text-white px-12 py-5 rounded-2xl font-black shadow-xl uppercase">發布</button></div></div><div id="annListArea" class="bg-white rounded-3xl shadow-sm border divide-y overflow-hidden"></div></div>
 
-            <!-- Equipment View -->
-            <div id="tabEquipment" class="tab-content space-y-10"><div class="bg-white p-12 rounded-[2.5rem] shadow-xl border"><h3 class="font-black text-3xl mb-10 flex items-center gap-5 italic uppercase tracking-tighter"><i data-lucide="hammer" class="text-sky-500 w-10 h-10"></i> Asset Management</h3><div class="grid grid-cols-1 md:grid-cols-3 gap-10"><div class="space-y-4"><label class="text-sm font-black text-slate-400 uppercase tracking-widest ml-4">設備名稱</label><input type="text" id="eqNameInput" class="w-full p-6 border-2 border-slate-100 bg-slate-50 rounded-3xl font-black text-xl focus:bg-white transition-all outline-none"></div><div class="space-y-4"><label class="text-sm font-black text-slate-400 uppercase tracking-widest ml-4">費用 (PT)</label><input type="number" id="eqFeeInput" class="w-full p-6 border-2 border-slate-100 bg-slate-50 rounded-3xl font-black text-xl focus:bg-white transition-all outline-none"></div><div class="flex items-end"><button onclick="addEquipment()" class="w-full bg-slate-900 text-white py-6 rounded-3xl font-black shadow-2xl uppercase active:scale-95 text-lg tracking-widest transition-all">新增紀錄</button></div></div></div><div id="eqListContainer" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-12"></div></div>
+            <!-- Equipment -->
+            <div id="tabEquipment" class="tab-content space-y-10"><div class="bg-white p-10 rounded-3xl shadow-sm border"><h3 class="font-black text-2xl mb-8 flex items-center gap-4 italic uppercase"><i data-lucide="hammer" class="text-sky-500 w-10 h-10"></i> Inventory</h3><div class="grid grid-cols-1 md:grid-cols-3 gap-8"><input type="text" id="eqName" placeholder="設備名稱" class="p-5 border rounded-2xl font-bold text-lg"><input type="number" id="eqFee" placeholder="租用點數" class="p-5 border rounded-2xl font-bold text-lg"><button onclick="addEquipment()" class="bg-slate-900 text-white py-5 rounded-2xl font-black shadow-xl uppercase">新增資產</button></div></div><div id="eqListArea" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10"></div></div>
 
-            <!-- Settings View -->
-            <div id="tabSettings" class="tab-content"><div class="max-w-4xl bg-white p-16 rounded-[3rem] border shadow-2xl space-y-16"><section class="border-b pb-16"><h3 class="font-black text-3xl text-slate-800 flex items-center gap-6 italic uppercase mb-12 tracking-tighter"><i data-lucide="link-2" class="text-blue-500 w-12 h-12"></i> API 雲端連線設定</h3><div class="bg-slate-900 p-12 rounded-[2rem] shadow-inner"><label class="text-xs font-black text-slate-500 uppercase tracking-[0.3em] block mb-8">Google Apps Script WebApp Exec URL</label><input type="text" id="apiUrlInputField" class="w-full p-6 bg-slate-800 text-green-400 rounded-2xl font-mono text-sm border-none outline-none ring-2 ring-slate-700 focus:ring-green-500 transition-all"></div></section><section class="pb-16"><h3 class="font-black text-3xl text-slate-800 flex items-center gap-6 italic uppercase mb-12 tracking-tighter"><i data-lucide="credit-card" class="text-orange-500 w-12 h-12"></i> 銀行匯款資訊設置</h3><div class="grid grid-cols-1 md:grid-cols-2 gap-12"><div class="space-y-4"><label class="text-sm font-black text-slate-400 uppercase tracking-widest ml-6">銀行名稱</label><input type="text" id="bankNameInput" class="w-full p-7 border-2 border-slate-100 rounded-3xl font-black text-2xl bg-slate-50 focus:bg-white transition-all outline-none"></div><div class="space-y-4"><label class="text-sm font-black text-slate-400 uppercase tracking-widest ml-6">帳戶戶名</label><input type="text" id="bankUserInput" class="w-full p-7 border-2 border-slate-100 rounded-3xl font-black text-2xl bg-slate-50 focus:bg-white transition-all outline-none"></div><div class="md:col-span-2 space-y-4"><label class="text-sm font-black text-slate-400 uppercase tracking-widest ml-6">銀行帳號數字</label><input type="text" id="bankAccountInput" class="w-full p-8 border-2 border-slate-100 rounded-[2rem] font-mono tracking-[0.2em] font-black text-4xl bg-slate-50 text-slate-700 outline-none"></div></div></section><button onclick="saveAllSettings()" class="w-full py-8 bg-[#06C755] text-white font-black rounded-[2rem] uppercase shadow-2xl shadow-green-200 text-3xl btn-active tracking-[0.2em] transition-all">確認並儲存所有設定</button></div></div>
+            <!-- Settings -->
+            <div id="tabSettings" class="tab-content"><div class="max-w-4xl bg-white p-12 rounded-3xl border shadow-xl space-y-12"><section class="border-b pb-12"><h3 class="font-black text-2xl border-b pb-6 uppercase italic"><i data-lucide="link-2" class="text-blue-500"></i> API CONFIG</h3><input type="text" id="apiUrlInput" class="w-full p-5 bg-slate-900 text-green-400 rounded-xl font-mono text-xs shadow-2xl mt-6"></section><section class="pb-12"><h3 class="font-black text-2xl border-b pb-6 uppercase italic"><i data-lucide="credit-card" class="text-orange-500"></i> BANK INFO</h3><div class="grid grid-cols-1 md:grid-cols-2 gap-8 mt-6"><input type="text" id="bankName" class="p-5 border rounded-2xl font-bold text-lg" placeholder="銀行名稱"><input type="text" id="bankUser" class="p-5 border rounded-2xl font-bold text-lg" placeholder="戶名"><input type="text" id="bankAccount" class="md:col-span-2 p-5 border rounded-2xl font-mono tracking-widest font-black" placeholder="帳號"></div></section><button onclick="saveSettings()" class="w-full py-6 bg-green-600 text-white font-black rounded-2xl uppercase shadow-2xl text-xl btn-active">儲存設定</button></div></div>
 
         </main>
     </div>
 
-    <!-- Logic Engine -->
     <script>
-        let apiEndpoint = localStorage.getItem('sportflow_api_url') || '';
-        let equipsData = []; let coursesData = [];
+        let endpoint = localStorage.getItem('sportflow_api_url') || '';
+        let globalEquips = []; let globalCourses = [];
 
-        window.onload = () => { 
-            lucide.createIcons(); 
-            document.getElementById('apiUrlInputField').value = apiEndpoint; 
-            if(apiEndpoint) { 
-                document.getElementById('apiStatusDot').style.backgroundColor = '#06C755'; 
-                refreshDashboard(); loadCourses(); preloadEquipData(); loadAnnouncements(); loadEquipment(); loadMembers(); loadBankInfo();
-            } else { switchTab('settings'); } 
-        };
+        window.onload = () => { lucide.createIcons(); document.getElementById('apiUrlInput').value = endpoint; if(endpoint) { document.getElementById('apiStatusDot').style.backgroundColor = '#06C755'; refreshDashboard(); loadCourses(); preloadEquipData(); loadAnnouncements(); loadEquipment(); loadMembers(); loadBankInfo(); } else { switchTab('settings'); } };
+        function switchTab(id) { document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active')); document.getElementById('tab' + id.charAt(0).toUpperCase() + id.slice(1)).classList.add('active'); document.querySelectorAll('.nav-item').forEach(n => n.classList.toggle('nav-active', n.dataset.tab === id)); document.getElementById('tabTitle').innerText = (id === 'members') ? '會員名冊' : (id === 'courses') ? '課程建置' : (id === 'announcements') ? '公告管理' : (id === 'equipment') ? '設備管理' : id.toUpperCase(); lucide.createIcons(); if (window.innerWidth < 1024) toggleSidebar(true); }
+        function toggleSidebar() { const s = document.getElementById('appSidebar'); s.classList.toggle('w-64'); s.classList.toggle('w-20'); s.classList.toggle('collapsed'); }
+        function showLoading(s) { document.getElementById('loadingIndicator').classList.toggle('hidden', !s); }
+        function previewImg(t, u) { const b = document.getElementById('pre' + t.charAt(0).toUpperCase() + t.slice(1)); b.innerHTML = (u && u.startsWith('http')) ? `<img src="${u}" class="w-full h-full object-cover rounded-xl shadow-sm">` : `<i data-lucide="image" class="w-10 h-10 opacity-10"></i>`; lucide.createIcons(); }
 
-        function switchTab(id) { 
-            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active')); 
-            document.getElementById('tab' + id.charAt(0).toUpperCase() + id.slice(1)).classList.add('active'); 
-            document.querySelectorAll('.nav-item').forEach(n => n.classList.toggle('nav-active', n.dataset.tab === id)); 
-            document.getElementById('tabTitle').innerText = (id === 'members') ? '會員名冊' : (id === 'courses') ? '課程建置' : (id === 'announcements') ? '公告管理' : (id === 'equipment') ? '設備管理' : id.toUpperCase(); 
-            if(id === 'settings') loadBankInfo();
-            if(id === 'announcements') loadAnnouncements();
-            if(id === 'equipment') { loadEquipment(); preloadEquipData(); }
-            lucide.createIcons(); if (window.innerWidth < 1024) toggleSidebar(true); 
-        }
+        async function callApi(a, p = {}) { if(!endpoint) return {success:false}; showLoading(true); try { const q = new URLSearchParams({ action: a, ...p }).toString(); const r = await fetch(`${endpoint}?${q}`); return await r.json(); } catch(e) { return {success:false, error:e.toString()}; } finally { showLoading(false); } }
 
-        function toggleSidebar(force) { const s = document.getElementById('appSidebar'); if(force) { s.classList.add('collapsed','w-20'); s.classList.remove('w-64'); } else { s.classList.toggle('w-64'); s.classList.toggle('w-20'); s.classList.toggle('collapsed'); } lucide.createIcons(); }
-        function showSpinner(show) { document.getElementById('loadingIndicator').classList.toggle('hidden', !show); }
-        function previewImg(type, url) { const box = document.getElementById('pre' + type.charAt(0).toUpperCase() + type.slice(1)); box.innerHTML = (url && url.startsWith('http')) ? `<img src="${url}" class="w-full h-full object-cover rounded-2xl shadow-md border-2 border-white">` : `<i data-lucide="image" class="w-12 h-12 opacity-10"></i>`; lucide.createIcons(); }
-
-        async function callApi(action, params = {}) { 
-            if(!apiEndpoint) return {success:false}; showSpinner(true); 
-            try { 
-                const query = new URLSearchParams({ action, ...params }).toString(); 
-                const response = await fetch(`${apiEndpoint}?${query}`); 
-                return await response.json(); 
-            } catch(e) { return {success:false, error:e.toString()}; } finally { showSpinner(false); } 
-        }
-
-        // --- Announcements ---
-        async function addAnnouncement() {
-            const title = document.getElementById('annTitleInput').value; if(!title) return;
-            const res = await callApi('addAnnouncement', { title });
-            if(res.success) { document.getElementById('annTitleInput').value = ''; loadAnnouncements(); }
-        }
-        async function loadAnnouncements() {
-            const list = document.getElementById('annListContainer');
-            const res = await callApi('getAnnouncements');
-            if(res && res.length > 0) {
-                list.innerHTML = res.reverse().map(a => `<div class="p-12 flex justify-between items-center bg-white border-b hover:bg-slate-50 transition-colors"><div class="flex items-center gap-8"><div class="w-5 h-5 rounded-full bg-amber-400 shadow-lg"></div><div><p class="font-black text-3xl text-slate-800 tracking-tight mb-2">${a.title}</p><p class="text-sm text-slate-400 font-mono font-black uppercase tracking-widest">${a.date}</p></div></div><button onclick="delAnn('${a.id}')" class="p-5 text-slate-200 hover:text-red-500 hover:bg-red-50 rounded-3xl transition-all"><i data-lucide="trash-2" class="w-10 h-10"></i></button></div>`).join(''); lucide.createIcons();
-            } else { list.innerHTML = '<p class="p-20 text-center text-slate-300 font-black uppercase tracking-widest">No Updates</p>'; }
-        }
-        async function delAnn(id) { if(!confirm('確定刪除？')) return; const res = await callApi('deleteAnnouncement', { id }); if(res.success) loadAnnouncements(); }
-
-        // --- Equipment ---
-        async function addEquipment() {
-            const name = document.getElementById('eqNameInput').value; const fee = document.getElementById('eqFeeInput').value; if(!name || !fee) return;
-            const res = await callApi('addEquipment', { name, fee });
-            if(res.success) { document.getElementById('eqNameInput').value = ''; document.getElementById('eqFeeInput').value = ''; loadEquipment(); preloadEquipData(); }
-        }
-        async function loadEquipment() {
-            const list = document.getElementById('eqListContainer');
-            const res = await callApi('getEquipment');
-            if(res && res.length > 0) {
-                list.innerHTML = res.map(e => `<div class="bg-white p-12 rounded-[3rem] border-l-[16px] border-l-sky-400 flex justify-between shadow-2xl shadow-slate-200 items-center hover:scale-105 transition-all group"><div><p class="font-black text-slate-800 uppercase tracking-tighter text-4xl mb-3 group-hover:text-sky-600 transition-colors">${e.name}</p><p class="text-blue-500 font-black font-mono text-3xl tracking-widest">$${e.fee} PT</p></div><button onclick="delEq('${e.id}')" class="p-4 text-slate-200 hover:text-red-500 transition-colors"><i data-lucide="trash-2" class="w-8 h-8"></i></button></div>`).join(''); lucide.createIcons();
-            } else { list.innerHTML = '<p class="col-span-full p-20 text-center text-slate-300 font-black uppercase">Inventory Empty</p>'; }
-        }
-        async function delEq(id) { if(!confirm('永久移除？')) return; const res = await callApi('deleteEquipment', { id }); if(res.success) { loadEquipment(); preloadEquipData(); } }
-
-        // --- Settings Persistence ---
-        async function loadBankInfo() {
-            const res = await callApi('getBankInfo');
-            if(res && res.success && res.data) {
-                document.getElementById('bankNameInput').value = res.data.bank || '';
-                document.getElementById('bankUserInput').value = res.data.user || '';
-                document.getElementById('bankAccountInput').value = res.data.account || '';
-            }
-        }
-        async function saveAllSettings() { 
-            const bankData = { bank: document.getElementById('bankNameInput').value, user: document.getElementById('bankUserInput').value, account: document.getElementById('bankAccountInput').value }; 
-            await callApi('saveBankInfo', bankData); 
-            apiEndpoint = document.getElementById('apiUrlInputField').value.trim(); 
-            localStorage.setItem('sportflow_api_url', apiEndpoint); 
-            alert('✅ 設定已存入雲端'); location.reload(); 
-        }
-
-        // --- Courses Core Logic (17 Fields Sequence) ---
-        async function preloadEquipData() { 
-            const res = await callApi('getEquipment'); 
-            if(res && res.length > 0) { 
-                equipsData = res; 
-                document.getElementById('courseEquipSelectArea').innerHTML = res.map(e => `<label class="flex items-center gap-6 bg-white border border-slate-200 px-10 py-6 rounded-[2rem] cursor-pointer hover:border-green-400 hover:shadow-xl transition-all"><input type="checkbox" name="chkCourseEquip" value="${e.id}" class="w-8 h-8 accent-[#06C755]"><div class="flex flex-col"><span class="text-xl font-black text-slate-800">${e.name}</span><span class="text-xs text-slate-400 font-bold">$${e.fee} PT</span></div></label>`).join(''); 
-            } 
-        }
+        async function preloadEquipData() { const res = await callApi('getEquipment'); if(res && res.length > 0) { globalEquips = res; document.getElementById('equipSelectArea').innerHTML = res.map(e => `<label class="flex items-center gap-3 bg-white border border-slate-200 px-6 py-4 rounded-2xl cursor-pointer hover:border-green-300 transition-all shadow-sm"><input type="checkbox" name="chkEquip" value="${e.id}" class="w-6 h-6 accent-[#06C755]"><div class="flex flex-col"><span class="text-base font-black">${e.name}</span><span class="text-xs text-slate-400 font-bold">$${e.fee}</span></div></label>`).join(''); } }
+        async function loadCourses() { const res = await callApi('getCourses'); if(res && res.length > 0) { globalCourses = res; document.getElementById('courseTableBody').innerHTML = res.map(c => `
+            <tr class="hover:bg-slate-50 transition-colors">
+                <td class="px-10 py-10 flex items-center gap-8">
+                    <img src="${c.coverUrl || 'https://via.placeholder.com/120x80'}" class="w-36 h-24 object-cover rounded-2xl border shadow-lg">
+                    <div>
+                        <div class="font-black text-slate-800 text-3xl uppercase tracking-tighter underline decoration-green-400 decoration-8 mb-2">${c.name}</div>
+                        <div class="text-base text-slate-400 font-bold uppercase tracking-widest">${c.date} | ${c.coach} | <span class="text-blue-500">${c.status || 'Open'}</span></div>
+                    </div>
+                </td>
+                <td class="px-10 py-10 text-center"><div class="text-slate-300 line-through text-base font-black">$${c.price}</div><div class="text-red-500 text-4xl font-black">$${c.earlyPrice || c.price}</div></td>
+                <td class="px-10 py-10 text-right"><div class="flex justify-end gap-5"><button onclick="startEdit('${c.id}')" class="p-5 bg-amber-50 text-amber-500 rounded-2xl hover:bg-amber-100 shadow-sm"><i data-lucide="edit-3" class="w-8 h-8"></i></button><button onclick="delCourse('${c.id}')" class="p-5 bg-red-50 text-red-500 rounded-2xl hover:bg-red-100 shadow-sm"><i data-lucide="trash-2" class="w-8 h-8"></i></button></div></td>
+            </tr>`).join(''); lucide.createIcons(); } }
         
-        async function loadCourses() { 
-            const res = await callApi('getCourses'); 
-            if(res && res.length > 0) { 
-                coursesData = res; 
-                document.getElementById('courseListTableBody').innerHTML = res.map(c => `
-                    <tr class="hover:bg-slate-50 transition-colors">
-                        <td class="px-10 py-12 flex items-center gap-12">
-                            <img src="${c.coverUrl || 'https://via.placeholder.com/120x80'}" class="w-48 h-32 object-cover rounded-[2rem] border-8 border-white shadow-2xl shadow-slate-200">
-                            <div>
-                                <div class="font-black text-slate-800 text-4xl uppercase tracking-tighter underline decoration-green-400 decoration-8 underline-offset-8 mb-4">${c.name}</div>
-                                <div class="text-xl text-slate-400 font-bold uppercase tracking-widest">${c.date} | ${c.coach} | <span class="text-blue-500 font-black">${c.status || 'Open'}</span></div>
-                            </div>
-                        </td>
-                        <td class="px-10 py-12 text-center"><div class="text-slate-300 line-through text-lg font-black mb-1">$${c.price}</div><div class="text-red-500 text-5xl font-black tracking-tighter">$${c.earlyPrice || c.price}</div></td>
-                        <td class="px-10 py-12 text-right"><div class="flex justify-end gap-6"><button onclick="startEditCourse('${c.id}')" class="p-6 bg-amber-50 text-amber-500 rounded-3xl hover:bg-amber-100 shadow-md transition-all"><i data-lucide="edit-3" class="w-10 h-10"></i></button><button onclick="delCourseRecord('${c.id}')" class="p-6 bg-red-50 text-red-500 rounded-3xl hover:bg-red-100 shadow-md transition-all"><i data-lucide="trash-2" class="w-10 h-10"></i></button></div></td>
-                    </tr>`).join(''); lucide.createIcons(); } }
-
-        function startEditCourse(id) {
-            const c = coursesData.find(x => x.id === id); if(!c) return;
-            document.getElementById('courseFormBlock').classList.add('edit-mode'); document.getElementById('courseEditBadge').classList.remove('hidden'); document.getElementById('courseBtnCancelEdit').classList.remove('hidden'); document.getElementById('courseFormTitle').innerHTML = '<i data-lucide="edit-3" class="w-14 h-14 text-amber-500"></i> 更新活動詳細規劃';
-            
-            document.getElementById('courseFieldId').value = c.id; 
-            document.getElementById('courseFieldName').value = c.name; 
-            document.getElementById('courseFieldLevelReq').value = c.levelReq; 
-            document.getElementById('courseFieldCoach').value = c.coach; 
-            document.getElementById('courseFieldDate').value = c.date; 
-            document.getElementById('courseFieldTime').value = c.time; 
-            document.getElementById('courseFieldPrice').value = c.price; 
-            document.getElementById('courseFieldEarlyPrice').value = c.earlyPrice; 
-            document.getElementById('courseFieldEarlyDeadline').value = c.earlyDeadline; 
-            document.getElementById('courseFieldSlots').value = c.slots; 
-            document.getElementById('courseFieldWaitlist').value = c.waitlist; 
-            document.getElementById('courseFieldStatus').value = c.status || 'Open'; 
-            document.getElementById('courseFieldCoverUrl').value = c.coverUrl; 
-            document.getElementById('courseFieldDescImgUrl').value = c.descImgUrl;
-            document.getElementById('courseFieldDesc').value = c.courseDesc || '';
-            document.getElementById('courseFieldVenue').value = c.venue || '';
-            
-            const eArr = (c.equipData || '').split(','); 
-            document.querySelectorAll('input[name="chkCourseEquip"]').forEach(cb => { cb.checked = eArr.includes(cb.value); });
-            
+        function startEdit(id) {
+            const c = globalCourses.find(x => x.id === id); if(!c) return;
+            document.getElementById('courseFormBlock').classList.add('edit-mode'); document.getElementById('editBadge').classList.remove('hidden'); document.getElementById('btnCancelEdit').classList.remove('hidden'); document.getElementById('formTitle').innerHTML = '<i data-lucide="edit-3" class="w-10 h-10 text-amber-500"></i> 更新活動詳情';
+            document.getElementById('fieldId').value = c.id; document.getElementById('fieldName').value = c.name; document.getElementById('fieldLevelReq').value = c.levelReq; document.getElementById('fieldCoach').value = c.coach; document.getElementById('fieldDate').value = c.date; document.getElementById('fieldTime').value = c.time; document.getElementById('fieldPrice').value = c.price; document.getElementById('fieldEarlyPrice').value = c.earlyPrice; document.getElementById('fieldEarlyDeadline').value = c.earlyDeadline; document.getElementById('fieldSlots').value = c.slots; document.getElementById('fieldWaitlist').value = c.waitlist; document.getElementById('fieldStatus').value = c.status || 'Open'; document.getElementById('fieldCoverUrl').value = c.coverUrl; document.getElementById('fieldDescImgUrl').value = c.descImgUrl; document.getElementById('fieldCourseDesc').value = c.courseDesc || ''; document.getElementById('fieldVenue').value = c.venue || '';
+            const eArr = (c.equipData || '').split(','); document.querySelectorAll('input[name="chkEquip"]').forEach(cb => cb.checked = eArr.includes(cb.value));
             previewImg('cover', c.coverUrl); previewImg('desc', c.descImgUrl);
             document.getElementById('mainScrollArea').scrollTo({ top: 0, behavior: 'smooth' }); lucide.createIcons();
         }
 
-        function clearCourseForm() { 
-            document.getElementById('courseFormBlock').classList.remove('edit-mode'); document.getElementById('courseEditBadge').classList.add('hidden'); document.getElementById('courseBtnCancelEdit').classList.add('hidden'); document.getElementById('courseFormTitle').innerHTML = '<i data-lucide="plus-circle" class="w-10 h-10 text-green-500"></i> Create New Activity'; 
-            document.getElementById('courseFieldId').value = ''; document.getElementById('courseFieldName').value = ''; document.getElementById('courseFieldDesc').value = ''; document.getElementById('courseFieldVenue').value = ''; 
-            document.querySelectorAll('input[name="chkCourseEquip"]').forEach(cb => cb.checked = false); 
-            previewImg('cover',''); previewImg('desc',''); lucide.createIcons(); 
-        }
-
+        function clearCourseForm() { document.getElementById('courseFormBlock').classList.remove('edit-mode'); document.getElementById('editBadge').classList.add('hidden'); document.getElementById('btnCancelEdit').classList.add('hidden'); document.getElementById('fieldId').value = ''; document.getElementById('fieldName').value = ''; document.querySelectorAll('input[name="chkEquip"]').forEach(cb => cb.checked = false); previewImg('cover',''); previewImg('desc',''); lucide.createIcons(); }
         async function processCourse() {
-            const id = document.getElementById('courseFieldId').value;
-            const eIds = Array.from(document.querySelectorAll('input[name="chkCourseEquip"]:checked')).map(el => el.value);
-            // 嚴格對應 Code.gs 中的 17 欄位參數名
-            const data = { id, name: document.getElementById('courseFieldName').value, levelReq: document.getElementById('courseFieldLevelReq').value, coach: document.getElementById('courseFieldCoach').value, date: document.getElementById('courseFieldDate').value, time: document.getElementById('courseFieldTime').value, price: document.getElementById('courseFieldPrice').value, earlyPrice: document.getElementById('courseFieldEarlyPrice').value, earlyDeadline: document.getElementById('courseFieldEarlyDeadline').value, slots: document.getElementById('courseFieldSlots').value, waitlist: document.getElementById('courseFieldWaitlist').value, equipData: eIds.join(','), status: document.getElementById('courseFieldStatus').value, coverUrl: document.getElementById('courseFieldCoverUrl').value, descImgUrl: document.getElementById('courseFieldDescImgUrl').value, courseDesc: document.getElementById('courseFieldDesc').value, venue: document.getElementById('courseFieldVenue').value };
-            if(!data.name || !data.date) return alert('必填內容缺失！');
+            const id = document.getElementById('fieldId').value;
+            const eIds = Array.from(document.querySelectorAll('input[name="chkEquip"]:checked')).map(el => el.value);
+            const data = { id, name: document.getElementById('fieldName').value, levelReq: document.getElementById('fieldLevelReq').value, coach: document.getElementById('fieldCoach').value, date: document.getElementById('fieldDate').value, time: document.getElementById('fieldTime').value, price: document.getElementById('fieldPrice').value, earlyPrice: document.getElementById('fieldEarlyPrice').value, earlyDeadline: document.getElementById('fieldEarlyDeadline').value, slots: document.getElementById('fieldSlots').value, waitlist: document.getElementById('fieldWaitlist').value, equipData: eIds.join(','), status: document.getElementById('fieldStatus').value, coverUrl: document.getElementById('fieldCoverUrl').value, descImgUrl: document.getElementById('fieldDescImgUrl').value, courseDesc: document.getElementById('fieldCourseDesc').value, venue: document.getElementById('fieldVenue').value };
+            if(!data.name || !data.date) return alert('必填項缺失');
             const res = await callApi(id ? 'updateCourse' : 'addCourse', data);
-            if(res.success) { alert('✅ 課程資料已同步同步！'); clearCourseForm(); loadCourses(); refreshDashboard(); }
+            if(res.success) { alert('同步成功'); clearCourseForm(); loadCourses(); refreshDashboard(); }
         }
 
-        async function delCourseRecord(id) { if(!confirm('永久刪除？')) return; const res = await callApi('deleteCourse', { id }); if(res.success) loadCourses(); }
-        async function loadMembers() { const list = document.getElementById('memberListTableBody'); const res = await callApi('getMembers'); if(res && res.length > 0) { list.innerHTML = res.map(m => `<tr class="hover:bg-slate-50 transition-all"><td class="px-10 py-10 font-black text-2xl text-slate-800">${m.name}</td><td class="px-10 py-10 font-mono font-bold text-slate-400 text-xl">${m.phone}</td><td class="px-10 py-10 text-center font-black text-green-600 text-3xl">${m.points} PT</td><td class="px-10 py-10 text-right underline text-blue-500 font-bold cursor-pointer">DETAIL</td></tr>`).join(''); } }
-        async function refreshDashboard() { const res = await callApi('getStats'); if(res && res.success) { document.getElementById('statMembers').innerText = res.stats.members; document.getElementById('statCourses').innerText = res.stats.courses; } }
+        async function delCourse(id) { if(!confirm('永久刪除？')) return; const res = await callApi('deleteCourse', { id }); if(res.success) loadCourses(); }
+        async function loadMembers() { const list = document.getElementById('memberListBody'); const res = await callApi('getMembers'); if(res.length > 0) { list.innerHTML = res.map(m => `<tr><td class="px-10 py-6 font-bold text-lg text-slate-800">${m.name}</td><td class="px-10 py-6 font-mono font-bold text-slate-400">${m.phone}</td><td class="px-10 py-6 text-center font-black text-green-600">${m.points} PT</td><td class="px-10 py-6 text-right font-black text-xs text-blue-500 underline cursor-pointer">DETAIL</td></tr>`).join(''); } }
+        async function addAnnouncement() { const title = document.getElementById('annTitle').value; if(!title) return; const res = await callApi('addAnnouncement', { title }); if(res.success) { document.getElementById('annTitle').value = ''; loadAnnouncements(); } }
+        async function loadAnnouncements() { const list = document.getElementById('annListArea'); const res = await callApi('getAnnouncements'); if(res && res.length > 0) { list.innerHTML = res.reverse().map(a => `<div class="p-10 flex justify-between items-center bg-white border-b hover:bg-slate-50 transition-colors"><div class="flex items-center gap-6"><div class="w-4 h-4 rounded-full bg-amber-400 shadow-sm"></div><div><p class="font-black text-2xl text-slate-700 tracking-tight">${a.title}</p><p class="text-sm text-slate-300 font-mono mt-2 font-bold uppercase tracking-widest">${a.date}</p></div></div><button onclick="delAnn('${a.id}')" class="p-4 text-slate-200 hover:text-red-500 transition-all hover:bg-red-50 rounded-2xl"><i data-lucide="trash-2" class="w-8 h-8"></i></button></div>`).join(''); lucide.createIcons(); } }
+        async function delAnn(id) { if(!confirm('刪除公告？')) return; const res = await callApi('deleteAnnouncement', { id }); if(res.success) loadAnnouncements(); }
+        async function addEquipment() { const name = document.getElementById('eqName').value; const fee = document.getElementById('eqFee').value; if(!name || !fee) return; const res = await callApi('addEquipment', { name, fee }); if(res.success) { document.getElementById('eqName').value = ''; document.getElementById('eqFee').value = ''; loadEquipment(); preloadEquipData(); } }
+        async function loadEquipment() { const list = document.getElementById('eqListArea'); const res = await callApi('getEquipment'); if(res && res.length > 0) { list.innerHTML = res.map(e => `<div class="bg-white p-12 rounded-[2.5rem] border-l-[12px] border-l-sky-400 flex justify-between shadow-xl items-center transition-all hover:scale-[1.03]"><div><p class="font-black text-slate-800 uppercase tracking-tighter text-3xl mb-2">${e.name}</p><p class="text-blue-500 font-black font-mono text-2xl tracking-widest">$${e.fee} PT</p></div><button onclick="delEq('${e.id}')" class="p-4 text-slate-200 hover:text-red-500 transition-colors"><i data-lucide="trash-2" class="w-8 h-8"></i></button></div>`).join(''); lucide.createIcons(); } }
+        async function delEq(id) { if(!confirm('移除設備？')) return; const res = await callApi('deleteEquipment', { id }); if(res.success) { loadEquipment(); preloadEquipData(); } }
+        async function refreshDashboard() { const res = await callApi('getStats'); if(res.success) { document.getElementById('statMembers').innerText = res.stats.members; document.getElementById('statCourses').innerText = res.stats.courses; } }
+        async function loadBankInfo() { const res = await callApi('getBankInfo'); if(res && res.success && res.data) { document.getElementById('bankName').value = res.data.bank || ''; document.getElementById('bankUser').value = res.data.user || ''; document.getElementById('bankAccount').value = res.data.account || ''; } }
+        async function saveSettings() { const bankData = { bank: document.getElementById('bankName').value, user: document.getElementById('bankUser').value, account: document.getElementById('bankAccount').value }; await callApi('saveBankInfo', bankData); endpoint = document.getElementById('apiUrlInput').value.trim(); localStorage.setItem('sportflow_api_url', endpoint); alert('✅ 設定同步成功！'); location.reload(); }
     </script>
 </body>
 </html>
