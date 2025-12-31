@@ -3,171 +3,200 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Sports Island | 預約中心 V5.6</title>
-    <!-- 導入 LINE OA 旗艦級開發資源 -->
+    <title>Sports Island | 預約中心 V5.8</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
-        :root { --brand-green: #06C755; --bg-gray: #F2F4F7; --text-dark: #111827; }
-        body { font-family: -apple-system, system-ui, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background-color: var(--bg-gray); color: var(--text-dark); -webkit-font-smoothing: antialiased; }
+        :root { --brand-green: #06C755; --bg-main: #FFFFFF; --text-primary: #111827; --text-secondary: #6B7280; }
+        body { 
+            font-family: -apple-system, system-ui, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; 
+            background-color: var(--bg-main); 
+            color: var(--text-primary); 
+            -webkit-font-smoothing: antialiased;
+            overflow-x: hidden;
+        }
         
         .tab-content { display: none; }
-        .tab-content.active { display: block; animation: slideUp 0.4s ease-out; }
+        .tab-content.active { display: block; }
         
-        /* 寬鬆版 LINE 風格卡片 */
-        .course-card { 
-            background: white; border-radius: 24px; box-shadow: 0 4px 12px rgba(0,0,0,0.03);
-            transition: transform 0.2s; cursor: pointer;
+        /* 徹底去框化列表：滿版佈局 */
+        .list-entry { 
+            display: flex; 
+            padding: 1.5rem 1rem; 
+            border-bottom: 1px solid #F3F4F6; 
+            gap: 1rem;
+            align-items: flex-start;
         }
-        .course-card:active { transform: scale(0.98); background-color: #f9fafb; }
+        .list-entry:active { background-color: #F9FAFB; }
 
-        /* 彈窗：仿手機原生抽屜 */
-        .modal-overlay { 
+        /* LINE 原生感底部抽屜 */
+        .sheet-overlay { 
             display: none; position: fixed; inset: 0; 
-            background: rgba(0,0,0,0.6); z-index: 1000; 
-            backdrop-filter: blur(4px); align-items: flex-end; 
+            background: rgba(0, 0, 0, 0.5); z-index: 1000; 
+            backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+            align-items: flex-end; 
         }
-        .modal-overlay.active { display: flex; }
-        .modal-inner { 
+        .sheet-overlay.active { display: flex; }
+        .sheet-inner { 
             background: white; border-radius: 32px 32px 0 0; width: 100%; 
-            max-height: 90vh; overflow-y: auto; 
-            animation: sheetUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            max-height: 94vh; overflow-y: auto; 
+            animation: sheetSlideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
         }
-        .modal-inner::-webkit-scrollbar { display: none; }
+        .sheet-inner::-webkit-scrollbar { display: none; }
 
-        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-        @keyframes sheetUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+        @keyframes sheetSlideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
         
         .line-clamp-2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+        .tag-pill { font-weight: 800; font-size: 9px; padding: 2px 6px; border-radius: 4px; text-transform: uppercase; letter-spacing: 1px; }
     </style>
 </head>
-<body class="pb-32 font-medium">
+<body class="pb-32">
 
-    <!-- Header -->
-    <header class="sticky top-0 z-50 bg-white border-b border-gray-100 px-6 py-5 flex items-center justify-between">
-        <div class="flex items-center gap-2">
-            <div class="w-9 h-9 bg-[#06C755] rounded-xl flex items-center justify-center font-bold text-white text-xl shadow-lg shadow-green-200">S</div>
-            <h1 class="text-xl font-black italic tracking-tighter uppercase font-sans">Sports Island</h1>
+    <!-- 頂部導航：去除冗餘設計 -->
+    <header class="sticky top-0 z-50 bg-white px-6 py-5 flex items-center justify-between border-b border-gray-100">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 bg-[#06C755] rounded-xl flex items-center justify-center font-bold text-white text-2xl shadow-sm italic font-sans">S</div>
+            <h1 class="text-2xl font-black italic tracking-tighter uppercase font-sans">Sports Island</h1>
         </div>
-        <div id="apiIndicator" class="w-2.5 h-2.5 rounded-full bg-green-500 shadow-[0_0_8px_#06C755]"></div>
+        <div id="statusDot" class="w-2.5 h-2.5 rounded-full bg-green-500 shadow-[0_0_8px_#06C755]"></div>
     </header>
 
-    <!-- 課程詳情抽屜 (Detail Modal) -->
-    <div id="detailModal" class="modal-overlay" onclick="closeDetail()">
-        <div class="modal-inner" onclick="event.stopPropagation()">
-            <!-- 拖動條指示 -->
-            <div class="w-12 h-1.5 bg-gray-200 rounded-full mx-auto my-4"></div>
+    <!-- 詳情抽屜 (Detail Sheet) -->
+    <div id="detailDrawer" class="sheet-overlay" onclick="hideDrawer()">
+        <div class="sheet-inner" onclick="event.stopPropagation()">
+            <!-- 抓手指示線 -->
+            <div class="w-12 h-1 bg-gray-200 rounded-full mx-auto my-4"></div>
             
-            <div class="relative w-full h-64 bg-gray-100">
-                <img id="modalImg" src="" class="w-full h-full object-cover">
+            <!-- 詳情圖片：滿版呈現 -->
+            <div class="relative w-full h-80 bg-gray-50">
+                <img id="drawerImg" src="" class="w-full h-full object-cover">
                 <div class="absolute bottom-6 left-6 flex gap-2">
-                    <span id="modalLevel" class="bg-black/60 backdrop-blur-md text-white text-[10px] font-black px-3 py-1.5 rounded-lg uppercase tracking-widest">LEVEL</span>
-                    <span id="modalStatus" class="bg-[#06C755] text-white text-[10px] font-black px-3 py-1.5 rounded-lg uppercase tracking-widest">STATUS</span>
+                    <span id="drawerLevel" class="bg-black/60 text-white tag-pill">LEVEL</span>
+                    <span id="drawerStatus" class="bg-[#06C755] text-white tag-pill">OPEN</span>
                 </div>
             </div>
             
-            <div class="p-8 pb-12">
-                <h3 id="modalTitle" class="text-2xl font-black mb-6 text-gray-900 leading-tight">活動名稱</h3>
+            <div class="p-8">
+                <h3 id="drawerTitle" class="text-3xl font-black mb-8 leading-tight tracking-tight text-gray-900">載入活動中...</h3>
                 
-                <div class="grid grid-cols-2 gap-6 mb-8 border-b pb-8 border-gray-50">
-                    <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 bg-red-50 text-red-500 rounded-xl flex items-center justify-center"><i data-lucide="map-pin" class="w-5 h-5"></i></div>
-                        <div><p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">地點</p><p id="modalVenue" class="font-bold text-sm">--</p></div>
+                <!-- 資訊流 -->
+                <div class="space-y-6 mb-12">
+                    <div class="flex items-center gap-5">
+                        <div class="w-12 h-12 bg-red-50 text-red-500 rounded-2xl flex items-center justify-center"><i data-lucide="map-pin" class="w-6 h-6"></i></div>
+                        <div><p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-0.5">地點位置</p><p id="drawerVenue" class="font-bold text-lg">--</p></div>
                     </div>
-                    <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 bg-blue-50 text-blue-500 rounded-xl flex items-center justify-center"><i data-lucide="user" class="w-5 h-5"></i></div>
-                        <div><p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">教練</p><p id="modalCoach" class="font-bold text-sm">--</p></div>
+                    <div class="flex items-center gap-5">
+                        <div class="w-12 h-12 bg-blue-50 text-blue-500 rounded-2xl flex items-center justify-center"><i data-lucide="user" class="w-6 h-6"></i></div>
+                        <div><p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-0.5">授課教練</p><p id="drawerCoach" class="font-bold text-lg">--</p></div>
+                    </div>
+                    <div class="flex items-center gap-5">
+                        <div class="w-12 h-12 bg-orange-50 text-orange-500 rounded-2xl flex items-center justify-center"><i data-lucide="clock" class="w-6 h-6"></i></div>
+                        <div><p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-0.5">時間時段</p><p id="drawerTime" class="font-bold text-lg font-sans">--</p></div>
                     </div>
                 </div>
 
-                <div class="mb-10">
-                    <h4 class="text-xs font-black text-gray-400 uppercase tracking-[0.2em] mb-4">活動詳細簡介</h4>
-                    <p id="modalDesc" class="text-gray-600 leading-relaxed text-base whitespace-pre-wrap font-medium">--</p>
+                <!-- 課程描述 -->
+                <div class="mb-12">
+                    <h4 class="text-xs font-black text-gray-400 uppercase tracking-[0.2em] mb-4 flex items-center gap-2 italic"><i data-lucide="align-left" class="w-4 h-4"></i> Description</h4>
+                    <p id="drawerDesc" class="text-gray-600 leading-relaxed text-base font-medium whitespace-pre-wrap">--</p>
                 </div>
 
-                <!-- 固定吸底預約欄 -->
+                <!-- 浮動動作欄 -->
                 <div class="flex items-center justify-between pt-6 border-t border-gray-100">
                     <div>
-                        <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">早鳥優惠點數</p>
-                        <p id="modalPrice" class="text-3xl font-black text-red-500 tracking-tighter">$ --</p>
+                        <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1 italic">Early Bird</p>
+                        <p id="drawerPrice" class="text-4xl font-black text-red-500 tracking-tighter font-sans">$ --</p>
                     </div>
-                    <button class="bg-[#06C755] text-white px-12 py-5 rounded-2xl font-black shadow-xl shadow-green-100 uppercase text-lg active:scale-95 transition-all">
-                        立即預約
+                    <button class="bg-[#06C755] text-white px-14 py-5 rounded-[1.5rem] font-black shadow-2xl shadow-green-100 uppercase text-xl active:scale-95 transition-all">
+                        立刻報名
                     </button>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Main Content -->
-    <main id="appBody" class="max-w-md mx-auto">
+    <!-- Main View Area -->
+    <main id="viewArea">
         
         <!-- Tab: Home -->
-        <div id="pageHome" class="tab-content active px-5 pt-5">
-            <!-- 品牌 Banner -->
-            <div class="relative w-full h-48 rounded-[2.5rem] overflow-hidden shadow-xl mb-10">
+        <div id="pageHome" class="tab-content active animate-in fade-in duration-500">
+            <!-- 滿版 Banner：移除圓角與邊框 -->
+            <div class="relative w-full h-64 overflow-hidden mb-12 shadow-md">
                 <img src="https://aiwe.cc/wp-content/uploads/2025/12/3486bc19dc6317e16bf4f1449ec52ae4.jpg" class="w-full h-full object-cover">
-                <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent flex flex-col justify-end p-8">
-                    <h2 class="text-white text-2xl font-black italic tracking-tighter uppercase">Sports Island</h2>
-                    <p class="text-green-300 text-[10px] font-bold uppercase tracking-[0.3em]">Active Life movement</p>
+                <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent flex flex-col justify-end p-10 font-sans">
+                    <h2 class="text-white text-3xl font-black italic mb-2 tracking-tighter uppercase">Sports Island Center</h2>
+                    <p class="text-green-300 text-[10px] font-bold uppercase tracking-[0.4em]">Active Life Concept</p>
                 </div>
             </div>
             
-            <div class="grid grid-cols-2 gap-4 mb-10">
-                <button onclick="go('courses')" class="bg-white p-7 rounded-3xl shadow-sm border border-gray-50 flex flex-col items-center gap-3 active:scale-95 transition-all">
-                    <div class="w-12 h-12 bg-green-50 text-green-500 rounded-2xl flex items-center justify-center shadow-inner"><i data-lucide="calendar" class="w-7 h-7"></i></div>
-                    <span class="font-bold text-base text-gray-700">預約課程</span>
+            <!-- 服務導覽：去框風格 -->
+            <div class="grid grid-cols-2 gap-px bg-gray-100 border-y border-gray-100 mb-12">
+                <button onclick="go('courses')" class="bg-white p-10 flex flex-col items-center gap-4 active:bg-gray-50 transition-all">
+                    <i data-lucide="calendar" class="w-8 h-8 text-green-500"></i>
+                    <span class="font-black text-sm uppercase text-slate-800 tracking-widest">課程預約</span>
                 </button>
-                <button onclick="go('member')" class="bg-white p-7 rounded-3xl shadow-sm border border-gray-50 flex flex-col items-center gap-3 active:scale-95 transition-all">
-                    <div class="w-12 h-12 bg-blue-50 text-blue-500 rounded-2xl flex items-center justify-center shadow-inner"><i data-lucide="user" class="w-7 h-7"></i></div>
-                    <span class="font-bold text-base text-gray-700">會員專區</span>
+                <button onclick="go('member')" class="bg-white p-10 flex flex-col items-center gap-4 active:bg-gray-50 transition-all border-l border-gray-100">
+                    <i data-lucide="user" class="w-8 h-8 text-blue-500"></i>
+                    <span class="font-black text-sm uppercase text-slate-800 tracking-widest">會員專區</span>
                 </button>
             </div>
 
-            <div class="mb-10">
-                <h3 class="text-sm font-black uppercase tracking-widest flex items-center gap-2 mb-5 px-1 text-gray-800 italic"><i data-lucide="megaphone" class="w-4 h-4 text-amber-500"></i> 最新公告消息</h3>
-                <div id="newsArea" class="space-y-4"></div>
+            <!-- 公告區：簡約列表 -->
+            <div class="mb-12 px-6">
+                <h3 class="text-[11px] font-black uppercase tracking-[0.3em] text-gray-400 mb-6 italic">News & Updates</h3>
+                <div id="newsContainer" class="divide-y divide-gray-50"></div>
             </div>
 
-            <div class="pb-10">
-                <h3 class="text-sm font-black uppercase tracking-widest flex items-center gap-2 mb-5 px-1 text-gray-800 italic"><i data-lucide="zap" class="w-4 h-4 text-orange-500"></i> 近期推薦課程</h3>
-                <div id="topCourses" class="space-y-6"></div>
-            </div>
-        </div>
-
-        <!-- Tab: All Courses -->
-        <div id="pageCourses" class="tab-content px-5 pt-5 pb-24">
-            <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 mb-8 flex items-center gap-4">
-                <i data-lucide="search" class="w-6 h-6 text-gray-300"></i>
-                <input type="text" placeholder="搜尋地點或教練姓名..." class="flex-1 outline-none text-lg bg-transparent font-bold">
-            </div>
-            <div id="fullCourseList" class="space-y-6"></div>
-        </div>
-
-        <!-- Tab: Member Card -->
-        <div id="pageMember" class="tab-content px-5 pt-5 animate-in slide-in-from-bottom duration-500">
-            <div class="bg-slate-900 p-10 rounded-[2.8rem] text-white shadow-2xl relative overflow-hidden mb-12">
-                <div class="absolute -right-8 -top-8 w-48 h-48 bg-green-500/10 rounded-full blur-[60px]"></div>
-                <p class="text-[10px] text-gray-500 font-bold uppercase tracking-[0.2em] mb-2">Member Identity</p>
-                <h2 class="text-4xl font-black italic uppercase font-sans mb-12">Tony Wang</h2>
-                <div class="grid grid-cols-2 border-t border-white/5 pt-8 gap-6">
-                    <div><p class="text-[10px] text-gray-400 font-bold uppercase tracking-widest mb-1">點數餘額</p><p class="text-3xl font-black text-[#06C755] font-sans">1,250</p></div>
-                    <div><p class="text-[10px] text-gray-400 font-bold uppercase tracking-widest mb-1">等級權限</p><p class="text-3xl font-black text-blue-400 font-sans">GOLD</p></div>
+            <!-- 推薦活動 -->
+            <div class="pb-16">
+                <div class="px-6 flex items-center justify-between mb-4">
+                    <h3 class="text-[11px] font-black uppercase tracking-[0.3em] text-gray-400 italic">Featured Activities</h3>
+                    <button onclick="go('courses')" class="text-[10px] text-[#06C755] font-black uppercase underline decoration-2 underline-offset-4 tracking-tighter">View All</button>
                 </div>
+                <div id="homeCourseList" class="divide-y divide-gray-50 border-t border-gray-50">
+                    <!-- 資料載入點 -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab: Courses -->
+        <div id="pageCourses" class="tab-content pb-24">
+            <div class="p-6 bg-gray-50 border-b border-gray-100 mb-2 flex items-center gap-4">
+                <i data-lucide="search" class="w-6 h-6 text-gray-300"></i>
+                <input type="text" placeholder="搜尋教練或球場地點..." class="flex-1 outline-none text-lg bg-transparent font-bold">
+            </div>
+            <div id="fullCourseList" class="divide-y divide-gray-50"></div>
+        </div>
+
+        <!-- Tab: Member -->
+        <div id="pageMember" class="tab-content animate-in slide-in-from-bottom duration-500 px-6 pt-10">
+            <div class="bg-slate-900 p-12 rounded-[2.5rem] text-white shadow-2xl relative overflow-hidden mb-12">
+                <div class="absolute -right-12 -top-12 w-64 h-64 bg-green-500/10 rounded-full blur-[80px]"></div>
+                <p class="text-[10px] text-slate-500 font-bold uppercase mb-4 tracking-[0.4em]">Membership ID</p>
+                <h2 class="text-5xl font-black italic uppercase font-sans mb-14 tracking-tighter">Tony Wang</h2>
+                <div class="grid grid-cols-2 border-t border-white/5 pt-10 gap-8">
+                    <div><p class="text-[10px] text-slate-500 font-bold uppercase mb-2 tracking-widest">Points Balance</p><p class="text-4xl font-black text-[#06C755] font-sans tracking-tighter">1,250</p></div>
+                    <div><p class="text-[10px] text-slate-500 font-bold uppercase mb-2 tracking-widest">Access Level</p><p class="text-4xl font-black text-blue-400 font-sans tracking-tighter">GOLD</p></div>
+                </div>
+            </div>
+            
+            <div class="space-y-4">
+                <button class="w-full p-8 bg-gray-50 rounded-3xl flex items-center justify-between active:scale-[0.98] transition-all"><span class="font-black text-lg text-slate-700 flex items-center gap-5"><i data-lucide="history" class="text-orange-500"></i>我的預約紀錄</span><i data-lucide="chevron-right" class="text-slate-300"></i></button>
+                <button class="w-full p-8 bg-gray-50 rounded-3xl flex items-center justify-between active:scale-[0.98] transition-all"><span class="font-black text-lg text-slate-700 flex items-center gap-5"><i data-lucide="credit-card" class="text-purple-500"></i>儲值點數紀錄</span><i data-lucide="chevron-right" class="text-slate-300"></i></button>
             </div>
         </div>
     </main>
 
-    <!-- Navigation -->
-    <nav class="fixed bottom-0 inset-x-0 bg-white/95 backdrop-blur-xl border-t border-gray-100 h-24 flex items-center justify-around z-50 px-6">
-        <button onclick="go('home')" id="navHome" class="flex flex-col items-center gap-1 nav-active"><i data-lucide="home" class="w-8 h-8"></i><span class="text-[10px] font-black uppercase">首頁</span></button>
-        <button onclick="go('courses')" id="navCourses" class="flex flex-col items-center gap-1 text-gray-300"><i data-lucide="calendar" class="w-8 h-8"></i><span class="text-[10px] font-black uppercase">預約</span></button>
-        <button onclick="go('member')" id="navMember" class="flex flex-col items-center gap-1 text-gray-300"><i data-lucide="user" class="w-8 h-8"></i><span class="text-[10px] font-black uppercase">我的</span></button>
+    <!-- Bottom Navigation -->
+    <nav class="fixed bottom-0 inset-x-0 bg-white/95 backdrop-blur-xl border-t border-gray-100 h-28 flex items-center justify-around z-50 px-8">
+        <button onclick="go('home')" id="navHome" class="flex flex-col items-center gap-2 nav-active transition-all"><i data-lucide="home" class="w-8 h-8"></i><span class="text-[9px] font-black uppercase tracking-widest">首頁</span></button>
+        <button onclick="go('courses')" id="navCourses" class="flex flex-col items-center gap-2 text-gray-300 transition-all"><i data-lucide="calendar" class="w-8 h-8"></i><span class="text-[9px] font-black uppercase tracking-widest">預約</span></button>
+        <button onclick="go('member')" id="navMember" class="flex flex-col items-center gap-2 text-gray-300 transition-all"><i data-lucide="user" class="w-8 h-8"></i><span class="text-[9px] font-black uppercase tracking-widest">我的</span></button>
     </nav>
 
     <script>
-        const API_URL = 'https://curly-feather-9ac5.wetw-net3.workers.dev/';
-        let db = [];
+        const CF_API = 'https://curly-feather-9ac5.wetw-net3.workers.dev/';
+        let activeData = [];
 
         window.onload = () => { lucide.createIcons(); sync(); };
 
@@ -181,82 +210,81 @@
         
         async function sync() {
             try {
-                const [annR, crsR] = await Promise.all([ fetch(`${API_URL}?action=getAnnouncements`), fetch(`${API_URL}?action=getCourses`) ]);
+                const [annR, crsR] = await Promise.all([ fetch(`${CF_API}?action=getAnnouncements`), fetch(`${CF_API}?action=getCourses`) ]);
                 const anns = await annR.json(); const crs = await crsR.json();
-                db = crs;
+                activeData = crs;
                 
-                // Announcements Rendering
-                document.getElementById('newsArea').innerHTML = anns.slice(0,3).reverse().map(a => `
-                    <div class="bg-white p-6 rounded-2xl border-l-[10px] border-l-amber-400 shadow-sm flex justify-between items-center active:bg-gray-50 transition-all">
-                        <p class="text-base font-black text-gray-700 truncate mr-6 uppercase font-sans">${a.title}</p>
-                        <span class="text-[10px] text-gray-400 font-mono font-bold shrink-0 uppercase">${a.date}</span>
+                // 公告
+                document.getElementById('newsContainer').innerHTML = anns.slice(0,3).reverse().map(a => `
+                    <div class="flex items-center gap-5 py-5 active:opacity-50 transition-opacity">
+                        <div class="w-1.5 h-1.5 rounded-full bg-amber-400"></div>
+                        <p class="text-lg font-bold text-slate-800 truncate flex-1 uppercase">${a.title}</p>
+                        <span class="text-[10px] text-slate-300 font-mono font-black">${a.date}</span>
                     </div>`).join('');
                 
                 /**
-                 * 旗艦版橫向卡片 (Spacious Layout)
-                 * 17 欄位 A-Q: [0]ID, [1]Name, [2]LevelReq, [3]Coach, [4]Date, [5]Time, [6]Price, [7]EarlyPrice, [8]Deadline, [9]Slots, [10]Waitlist, [11]Equip, [12]Status, [13]Cover, [14]DescImg, [15]CourseDesc, [16]Venue
+                 * 旗艦去框流線卡片
+                 * 17 欄位 A-Q: [0]ID, [1]Name, [2]LevelReq, [3]Coach, [4]Date, [5]Time, [6]Price, [7]EarlyPrice... [15]CourseDesc, [16]Venue
                  */
-                const buildCard = (c) => `
-                    <div class="course-card flex p-4 gap-5" onclick="showDetail('${c.id}')">
-                        <!-- Left: Thumbnail (Large Square) -->
-                        <div class="w-32 h-32 shrink-0 relative rounded-2xl overflow-hidden shadow-md">
-                            <img src="${c.coverUrl || 'https://via.placeholder.com/300'}" class="w-full h-full object-cover">
-                            <div class="absolute bottom-0 left-0 w-full bg-gradient-to-t from-black/70 to-transparent p-2">
-                                <span class="bg-[#06C755] text-white text-[8px] font-black px-2 py-0.5 rounded-md uppercase tracking-widest">${c.levelReq}</span>
+                const buildRow = (c) => `
+                    <div class="list-entry" onclick="showDrawer('${c.id}')">
+                        <!-- 大尺寸 4:3 比例縮圖 -->
+                        <div class="w-32 h-24 shrink-0 rounded-xl overflow-hidden bg-gray-50 relative border border-gray-100 shadow-sm">
+                            <img src="${c.coverUrl || 'https://via.placeholder.com/400'}" class="w-full h-full object-cover">
+                            <div class="absolute top-0 left-0">
+                                <span class="bg-black/60 text-white tag-pill rounded-br-lg">${c.levelReq}</span>
                             </div>
                         </div>
 
-                        <!-- Right: Information (Spacious) -->
-                        <div class="flex-1 flex flex-col justify-between min-w-0">
+                        <!-- 右側資訊區：全寬展示 -->
+                        <div class="flex-1 min-w-0 flex flex-col justify-between">
                             <div>
-                                <h4 class="font-black text-gray-900 text-lg truncate uppercase mb-1 tracking-tight">${c.name}</h4>
-                                <div class="flex items-center gap-1.5 text-xs text-red-500 font-bold uppercase mb-1 italic">
+                                <h4 class="font-black text-gray-900 text-xl truncate uppercase tracking-tighter mb-1">${c.name}</h4>
+                                <div class="flex items-center gap-1.5 text-xs text-red-500 font-bold uppercase italic mb-1.5">
                                     <i data-lucide="map-pin" class="w-3.5 h-3.5"></i> ${c.venue || '場館未定'}
                                 </div>
-                                <p class="text-gray-400 text-xs font-bold uppercase tracking-tighter flex items-center gap-2">
-                                    <i data-lucide="user" class="w-3 h-3 text-blue-400"></i> ${c.coach} | ${c.date}
+                                <p class="text-gray-400 text-sm font-medium line-clamp-2 leading-snug tracking-tight">
+                                    ${c.courseDesc || '歡迎點選查看詳細介紹內容。'}
                                 </p>
                             </div>
 
-                            <!-- Bottom Row: Price & Actions -->
-                            <div class="flex items-end justify-between mt-2">
-                                <div class="flex flex-col">
-                                    <span class="text-[9px] text-gray-300 line-through font-black">$${c.price}</span>
-                                    <span class="text-xl font-black text-red-500 tracking-tighter">$${c.earlyPrice || c.price}</span>
+                            <div class="flex items-end justify-between mt-3">
+                                <div class="flex items-center gap-3 text-[10px] text-slate-300 font-bold uppercase italic font-sans">
+                                    <span class="flex items-center gap-1"><i data-lucide="user" class="w-3 h-3"></i> ${c.coach}</span>
+                                    <span>${c.date}</span>
                                 </div>
-                                <div class="flex gap-2">
-                                    <button onclick="event.stopPropagation(); showDetail('${c.id}')" class="text-[10px] font-black text-blue-500 underline uppercase tracking-widest py-2 px-1">詳情</button>
-                                    <button class="bg-[#06C755] text-white px-5 py-2.5 rounded-xl text-[10px] font-black shadow-lg shadow-green-100 uppercase tracking-widest active:scale-90 transition-all">預約</button>
+                                <div class="flex items-center gap-4">
+                                    <span class="text-2xl font-black text-red-500 tracking-tighter font-sans">$${c.earlyPrice || c.price}</span>
+                                    <button class="bg-[#06C755] text-white px-6 py-2.5 rounded-xl text-xs font-black shadow-lg shadow-green-100 uppercase active:scale-90 transition-all">預約</button>
                                 </div>
                             </div>
                         </div>
                     </div>`;
                 
-                document.getElementById('topCourses').innerHTML = crs.slice(0,5).map(c => buildCard(c)).join('');
-                document.getElementById('fullCourseList').innerHTML = crs.map(c => buildCard(c)).join(''); 
+                document.getElementById('homeCourseList').innerHTML = crs.slice(0,5).map(c => buildRow(c)).join('');
+                document.getElementById('fullCourseList').innerHTML = crs.map(c => buildRow(c)).join(''); 
                 lucide.createIcons();
             } catch(e) { console.error("Sync Error", e); }
         }
 
-        // --- Detail Modal Engine ---
-        function showDetail(id) {
-            const c = db.find(x => x.id === id); if(!c) return;
-            document.getElementById('modalImg').src = c.descImgUrl || c.coverUrl || 'https://via.placeholder.com/600x400';
-            document.getElementById('modalTitle').innerText = c.name;
-            document.getElementById('modalLevel').innerText = c.levelReq;
-            document.getElementById('modalStatus').innerText = c.status || 'OPEN';
-            document.getElementById('modalVenue').innerText = c.venue || '運動場館地點';
-            document.getElementById('modalCoach').innerText = c.coach || '專業教練';
-            document.getElementById('modalDate').innerText = c.date;
-            document.getElementById('modalTime').innerText = c.time || '時段載入中';
-            document.getElementById('modalDesc').innerText = c.courseDesc || '歡迎參加課程。';
-            document.getElementById('modalPrice').innerText = `$${c.earlyPrice || c.price}`;
+        // --- Drawer Logic ---
+        function showDrawer(id) {
+            const c = activeData.find(x => x.id === id); if(!c) return;
+            document.getElementById('drawerImg').src = c.descImgUrl || c.coverUrl || 'https://via.placeholder.com/600';
+            document.getElementById('drawerTitle').innerText = c.name;
+            document.getElementById('drawerLevel').innerText = c.levelReq;
+            document.getElementById('drawerStatus').innerText = c.status || 'OPEN';
+            document.getElementById('drawerVenue').innerText = c.venue || '運動場館地點';
+            document.getElementById('drawerCoach').innerText = c.coach || '教練';
+            document.getElementById('drawerDateTime').innerText = `${c.date} | ${c.time || '--'}`;
+            document.getElementById('drawerDesc').innerText = c.courseDesc || '目前無詳細說明。';
+            document.getElementById('drawerPrice').innerText = `$${c.earlyPrice || c.price}`;
 
-            document.getElementById('detailModal').classList.add('active');
+            document.getElementById('detailDrawer').classList.add('active');
             lucide.createIcons();
         }
 
-        function closeDetail() { document.getElementById('detailModal').classList.remove('active'); }
+        function hideDrawer() { document.getElementById('detailDrawer').classList.remove('active'); }
     </script>
 </body>
 </html>
