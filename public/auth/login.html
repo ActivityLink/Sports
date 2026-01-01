@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Line 登入 - 竹北運動島</title>
+    <!-- LIFF SDK -->
+    <script charset="utf-8" src="https://static.line-scdn.net/liff/edge/versions/2.22.3/sdk.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { 
@@ -104,6 +106,19 @@
             color: #06C755;
             text-decoration: none;
         }
+        
+        .loading {
+            display: none;
+        }
+        
+        .error-message {
+            background: #ffebee;
+            color: #c62828;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 20px;
+            display: none;
+        }
     </style>
 </head>
 <body>
@@ -112,11 +127,24 @@
         <h1>竹北運動島活動中心</h1>
         <p class="subtitle">請使用 Line 登入會員課程系統</p>
         
-        <button class="line-login-btn" onclick="lineLogin()">
+        <!-- Line 登入按鈕 -->
+        <button class="line-login-btn" onclick="liffLogin()" id="line-login-btn">
             <span class="line-icon">L</span>
             <span>使用 Line 帳號登入</span>
         </button>
         
+        <!-- 載入中 -->
+        <div class="loading" id="loading">
+            <div style="margin-bottom: 15px;">⏳ 登入處理中...</div>
+            <div style="width: 100%; height: 4px; background: #f0f0f0; border-radius: 2px; overflow: hidden;">
+                <div id="progress-bar" style="height: 100%; background: #06C755; width: 0%; transition: width 0.3s;"></div>
+            </div>
+        </div>
+        
+        <!-- 錯誤訊息 -->
+        <div class="error-message" id="error-message"></div>
+        
+        <!-- 體驗模式按鈕（開發用） -->
         <button class="demo-login" onclick="demoLogin()">
             體驗模式（免登入）
         </button>
@@ -129,23 +157,93 @@
     </div>
     
     <script>
-        // Line Login 設定
-        const LINE_CONFIG = {
-            channelId: 'YOUR_CHANNEL_ID_HERE', // 請替換成你的 Channel ID
-            redirectUri: encodeURIComponent(window.location.origin + '/Sports/auth/callback.html'),
-            state: generateRandomString(16),
-            nonce: generateRandomString(16)
-        };
+        // LIFF ID - 請替換成你的 LIFF ID
+        const LIFF_ID = 'YOUR_LIFF_ID_HERE'; // ← 這裡要換成你的 LIFF ID
+        
+        let liff = null;
+        
+        // 初始化 LIFF
+        async function initializeLiff() {
+            try {
+                // 初始化 LIFF
+                liff = await liff.init({ 
+                    liffId: LIFF_ID 
+                });
+                
+                console.log('LIFF 初始化成功');
+                
+                // 如果已經在 Line 內且已登入，自動取得使用者資訊
+                if (liff.isInClient() && liff.isLoggedIn()) {
+                    await getUserProfile();
+                }
+                
+            } catch (error) {
+                console.error('LIFF 初始化失敗:', error);
+                showError('無法初始化 Line 服務，請稍後再試');
+            }
+        }
         
         // Line 登入
-        function lineLogin() {
-            const authUrl = `https://access.line.me/oauth2/v2.1/authorize?response_type=code&client_id=${LINE_CONFIG.channelId}&redirect_uri=${LINE_CONFIG.redirectUri}&state=${LINE_CONFIG.state}&scope=profile%20openid%20email&nonce=${LINE_CONFIG.nonce}`;
-            
-            // 儲存 state 用於驗證
-            localStorage.setItem('line_login_state', LINE_CONFIG.state);
-            
-            // 跳轉到 Line 登入頁面
-            window.location.href = authUrl;
+        async function liffLogin() {
+            try {
+                // 顯示載入中
+                document.getElementById('line-login-btn').style.display = 'none';
+                document.getElementById('loading').style.display = 'block';
+                document.getElementById('progress-bar').style.width = '30%';
+                
+                if (!liff.isLoggedIn()) {
+                    // 登入
+                    document.getElementById('progress-bar').style.width = '50%';
+                    await liff.login();
+                    document.getElementById('progress-bar').style.width = '70%';
+                }
+                
+                // 取得使用者資訊
+                document.getElementById('progress-bar').style.width = '90%';
+                await getUserProfile();
+                
+            } catch (error) {
+                console.error('登入失敗:', error);
+                showError('登入失敗：' + error.message);
+                
+                // 恢復按鈕顯示
+                document.getElementById('line-login-btn').style.display = 'flex';
+                document.getElementById('loading').style.display = 'none';
+            }
+        }
+        
+        // 取得使用者資訊
+        async function getUserProfile() {
+            try {
+                const profile = await liff.getProfile();
+                const idToken = liff.getIDToken();
+                
+                // 儲存使用者資料
+                const userData = {
+                    userId: profile.userId,
+                    displayName: profile.displayName,
+                    pictureUrl: profile.pictureUrl || '',
+                    statusMessage: profile.statusMessage || '',
+                    idToken: idToken,
+                    loginMethod: 'line',
+                    loginTime: new Date().toISOString()
+                };
+                
+                // 儲存到 localStorage
+                localStorage.setItem('user_data', JSON.stringify(userData));
+                localStorage.setItem('is_logged_in', 'true');
+                
+                document.getElementById('progress-bar').style.width = '100%';
+                
+                // 跳轉到儀表板
+                setTimeout(() => {
+                    window.location.href = '../dashboard/index.html';
+                }, 500);
+                
+            } catch (error) {
+                console.error('取得使用者資訊失敗:', error);
+                throw error;
+            }
         }
         
         // 體驗模式（開發用）
@@ -154,7 +252,9 @@
                 userId: 'demo_001',
                 displayName: '體驗會員',
                 pictureUrl: '',
-                email: 'demo@example.com'
+                statusMessage: '這是體驗帳號',
+                loginMethod: 'demo',
+                loginTime: new Date().toISOString()
             };
             
             localStorage.setItem('user_data', JSON.stringify(demoUser));
@@ -164,14 +264,10 @@
             window.location.href = '../dashboard/index.html';
         }
         
-        // 產生隨機字串
-        function generateRandomString(length) {
-            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-            let result = '';
-            for (let i = 0; i < length; i++) {
-                result += chars.charAt(Math.floor(Math.random() * chars.length));
-            }
-            return result;
+        // 顯示錯誤訊息
+        function showError(message) {
+            document.getElementById('error-message').textContent = message;
+            document.getElementById('error-message').style.display = 'block';
         }
         
         // 檢查是否已登入
@@ -181,8 +277,14 @@
             }
         }
         
-        // 頁面載入時檢查登入狀態
-        checkLoginStatus();
+        // 頁面載入時初始化
+        window.addEventListener('DOMContentLoaded', async () => {
+            // 先檢查是否已登入
+            checkLoginStatus();
+            
+            // 初始化 LIFF
+            await initializeLiff();
+        });
     </script>
 </body>
 </html>
