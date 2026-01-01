@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>管理後台 - Line OA 風格</title>
+    <style>
+        /* Line OA 風格 CSS */
+        :root {
+            --line-green: #00B900;
+            --line-light-green: #E0F7E9;
+            --line-gray: #F5F5F5;
+            --line-dark-gray: #333333;
+            --line-border: #E0E0E0;
+            --line-card-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+        
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+            background-color: #fafafa;
+            color: #333;
+        }
+        
+        /* 頂部導航欄 - Line OA 風格 */
+        .navbar {
+            background: white;
+            border-bottom: 1px solid var(--line-border);
+            padding: 0 24px;
+            height: 64px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+        
+        .navbar-brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .logo {
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, #00B900 0%, #00C300 100%);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 18px;
+        }
+        
+        .brand-text {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--line-dark-gray);
+        }
+        
+        .brand-subtext {
+            font-size: 12px;
+            color: #666;
+            margin-left: 8px;
+        }
+        
+        .user-menu {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        
+        .user-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 14px;
+        }
+        
+        /* 側邊欄 - Line OA 風格 */
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 64px;
+            bottom: 0;
+            width: 240px;
+            background: white;
+            border-right: 1px solid var(--line-border);
+            overflow-y: auto;
+            padding: 20px 0;
+        }
+        
+        .nav-section {
+            margin-bottom: 24px;
+        }
+        
+        .nav-title {
+            font-size: 12px;
+            font-weight: 600;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            padding: 0 24px 8px;
+            margin-bottom: 8px;
+            border-bottom: 1px solid var(--line-border);
+        }
+        
+        .nav-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 24px;
+            color: #555;
+            text-decoration: none;
+            transition: all 0.2s;
+            cursor: pointer;
+            border-left: 3px solid transparent;
+        }
+        
+        .nav-item:hover {
+            background: var(--line-gray);
+            color: var(--line-green);
+        }
+        
+        .nav-item.active {
+            background: var(--line-light-green);
+            color: var(--line-green);
+            border-left: 3px solid var(--line-green);
+            font-weight: 500;
+        }
+        
+        .nav-icon {
+            margin-right: 12px;
+            font-size: 18px;
+            width: 24px;
+            text-align: center;
+        }
+        
+        /* 主內容區 */
+        .main-content {
+            margin-left: 240px;
+            margin-top: 64px;
+            padding: 24px;
+            min-height: calc(100vh - 64px);
+        }
+        
+        .page-header {
+            margin-bottom: 32px;
+        }
+        
+        .page-title {
+            font-size: 24px;
+            font-weight: 600;
+            color: var(--line-dark-gray);
+            margin-bottom: 8px;
+        }
+        
+        .page-subtitle {
+            color: #666;
+            font-size: 14px;
+        }
+        
+        /* 卡片設計 - Line OA 風格 */
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+            margin-bottom: 32px;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 12px;
+            border: 1px solid var(--line-border);
+            padding: 24px;
+            box-shadow: var(--line-card-shadow);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+        
+        .card-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--line-dark-gray);
+        }
+        
+        .card-value {
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--line-green);
+            margin-bottom: 8px;
+        }
+        
+        .card-trend {
+            font-size: 14px;
+            color: #666;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        
+        .trend-up { color: #00B900; }
+        .trend-down { color: #FF3B30; }
+        
+        /* 圖表卡片 */
+        .chart-card {
+            grid-column: span 2;
+        }
+        
+        /* 表格設計 */
+        .data-table {
+            background: white;
+            border-radius: 12px;
+            border: 1px solid var(--line-border);
+            overflow: hidden;
+            box-shadow: var(--line-card-shadow);
+        }
+        
+        .table-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 24px;
+            border-bottom: 1px solid var(--line-border);
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        th {
+            text-align: left;
+            padding: 16px 24px;
+            background: var(--line-gray);
+            font-weight: 600;
+            color: var(--line-dark-gray);
+            border-bottom: 1px solid var(--line-border);
+        }
+        
+        td {
+            padding: 16px 24px;
+            border-bottom: 1px solid var(--line-border);
+        }
+        
+        tr:hover {
+            background: var(--line-gray);
+        }
+        
+        /* 按鈕設計 */
+        .btn {
+            padding: 8px 16px;
+            border-radius: 6px;
+            border: none;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 14px;
+        }
+        
+        .btn-primary {
+            background: var(--line-green);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #00A000;
+        }
+        
+        .btn-secondary {
+            background: white;
+            color: var(--line-dark-gray);
+            border: 1px solid var(--line-border);
+        }
+        
+        .btn-secondary:hover {
+            background: var(--line-gray);
+        }
+        
+        /* 標籤設計 */
+        .status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        
+        .status-active { background: #E0F7E9; color: #00B900; }
+        .status-pending { background: #FFF3E0; color: #FF9800; }
+        .status-inactive { background: #F5F5F5; color: #9E9E9E; }
+        
+        /* 響應式設計 */
+        @media (max-width: 1024px) {
+            .sidebar { width: 200px; }
+            .main-content { margin-left: 200px; }
+        }
+        
+        @media (max-width: 768px) {
+            .sidebar { display: none; }
+            .main-content { margin-left: 0; }
+            .cards-grid { grid-template-columns: 1fr; }
+            .chart-card { grid-column: 1; }
+        }
+    </style>
+</head>
+<body>
+    <!-- 頂部導航欄 -->
+    <nav class="navbar">
+        <div class="navbar-brand">
+            <div class="logo">運</div>
+            <div>
+                <span class="brand-text">竹北運動島管理後台</span>
+                <span class="brand-subtext">Sports Island Admin</span>
+            </div>
+        </div>
+        
+        <div class="user-menu">
+            <div style="text-align: right;">
+                <div style="font-weight: 500;">管理員</div>
+                <div style="font-size: 12px; color: #666;">admin@sports.island</div>
+            </div>
+            <div class="user-avatar">A</div>
+        </div>
+    </nav>
+    
+    <!-- 側邊欄 -->
+    <div class="sidebar">
+        <div class="nav-section">
+            <div class="nav-title">儀表板</div>
+            <div class="nav-item active" onclick="loadDashboard()">
+                <span class="nav-icon">📊</span>
+                <span>數據總覽</span>
+            </div>
+            <div class="nav-item" onclick="loadAnalytics()">
+                <span class="nav-icon">📈</span>
+                <span>分析報告</span>
+            </div>
+        </div>
+        
+        <div class="nav-section">
+            <div class="nav-title">課程管理</div>
+            <div class="nav-item" onclick="loadCourseCatalog()">
+                <span class="nav-icon">📚</span>
+                <span>課程目錄</span>
+            </div>
+            <div class="nav-item" onclick="loadSeriesManager()">
+                <span class="nav-icon">📅</span>
+                <span>梯次課管理</span>
+            </div>
+            <div class="nav-item" onclick="loadCourseTypes()">
+                <span class="nav-icon">🏷️</span>
+                <span>課程類型管理</span>
+            </div>
+            <div class="nav-item" onclick="loadSchedule()">
+                <span class="nav-icon">🗓️</span>
+                <span>課表排程</span>
+            </div>
+        </div>
+        
+        <div class="nav-section">
+            <div class="nav-title">會員管理</div>
+            <div class="nav-item" onclick="loadMembers()">
+                <span class="nav-icon">👥</span>
+                <span>會員列表</span>
+            </div>
+            <div class="nav-item" onclick="loadRegistrations()">
+                <span class="nav-icon">📝</span>
+                <span>報名管理</span>
+            </div>
+            <div class="nav-item" onclick="loadAttendance()">
+                <span class="nav-icon">✅</span>
+                <span>出勤管理</span>
+            </div>
+        </div>
+        
+        <div class="nav-section">
+            <div class="nav-title">財務管理</div>
+            <div class="nav-item" onclick="loadPayments()">
+                <span class="nav-icon">💳</span>
+                <span>收款管理</span>
+            </div>
+            <div class="nav-item" onclick="loadRefunds()">
+                <span class="nav-icon">🔄</span>
+                <span>退費管理</span>
+            </div>
+            <div class="nav-item" onclick="loadReports()">
+                <span class="nav-icon">📄</span>
+                <span>財務報表</span>
+            </div>
+        </div>
+        
+        <div class="nav-section">
+            <div class="nav-title">系統設定</div>
+            <div class="nav-item" onclick="loadSettings()">
+                <span class="nav-icon">⚙️</span>
+                <span>系統設定</span>
+            </div>
+            <div class="nav-item" onclick="loadLineIntegration()">
+                <span class="nav-icon">💬</span>
+                <span>Line 整合</span>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 主內容區 -->
+    <div class="main-content" id="main-content">
+        <div class="page-header">
+            <h1 class="page-title">數據總覽</h1>
+            <p class="page-subtitle">最後更新：今日 14:30</p>
+        </div>
+        
+        <!-- 數據卡片 -->
+        <div class="cards-grid">
+            <!-- 今日報名 -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">今日報名數</div>
+                    <div class="card-trend trend-up">↑ 12%</div>
+                </div>
+                <div class="card-value">24</div>
+                <div class="card-trend">較昨日增加 3 人</div>
+            </div>
+            
+            <!-- 本月營收 -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">本月營收</div>
+                    <div class="card-trend trend-up">↑ 8%</div>
+                </div>
+                <div class="card-value">NT$ 186,500</div>
+                <div class="card-trend">已達成目標 78%</div>
+            </div>
+            
+            <!-- 活躍會員 -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">活躍會員</div>
+                    <div class="card-trend trend-up">↑ 5%</div>
+                </div>
+                <div class="card-value">1,248</div>
+                <div class="card-trend">本月新增 86 人</div>
+            </div>
+            
+            <!-- 課程數 -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">進行中課程</div>
+                    <div class="card-trend">持平</div>
+                </div>
+                <div class="card-value">42</div>
+                <div class="card-trend">總課程數 156</div>
+            </div>
+            
+            <!-- 出勤率 -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">平均出勤率</div>
+                    <div class="card-trend trend-up">↑ 2%</div>
+                </div>
+                <div class="card-value">94%</div>
+                <div class="card-trend">較上月提升</div>
+            </div>
+            
+            <!-- 滿意度 -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">滿意度評分</div>
+                    <div class="card-trend trend-up">↑ 3%</div>
+                </div>
+                <div class="card-value">4.8</div>
+                <div class="card-trend">滿分 5.0</div>
+            </div>
+            
+            <!-- 圖表卡片 -->
+            <div class="card chart-card">
+                <div class="card-header">
+                    <div class="card-title">報名人數趨勢</div>
+                    <select class="btn btn-secondary" style="padding: 6px 12px;">
+                        <option>最近7天</option>
+                        <option>最近30天</option>
+                        <option>本季</option>
+                    </select>
+                </div>
+                <div style="height: 200px; display: flex; align-items: flex-end; gap: 8px; padding: 20px 0;">
+                    <div style="flex: 1; background: linear-gradient(to top, #00B900, #E0F7E9); height: 80%; border-radius: 4px;"></div>
+                    <div style="flex: 1; background: linear-gradient(to top, #00B900, #E0F7E9); height: 65%; border-radius: 4px;"></div>
+                    <div style="flex: 1; background: linear-gradient(to top, #00B900, #E0F7E9); height: 90%; border-radius: 4px;"></div>
+                    <div style="flex: 1; background: linear-gradient(to top, #00B900, #E0F7E9); height: 75%; border-radius: 4px;"></div>
+                    <div style="flex: 1; background: linear-gradient(to top, #00B900, #E0F7E9); height: 85%; border-radius: 4px;"></div>
+                    <div style="flex: 1; background: linear-gradient(to top, #00B900, #E0F7E9); height: 95%; border-radius: 4px;"></div>
+                    <div style="flex: 1; background: linear-gradient(to top, #00B900, #E0F7E9); height: 70%; border-radius: 4px;"></div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 近期報名表格 -->
+        <div class="data-table">
+            <div class="table-header">
+                <div class="card-title">近期報名記錄</div>
+                <button class="btn btn-primary">查看全部</button>
+            </div>
+            
+            <table>
+                <thead>
+                    <tr>
+                        <th>報名編號</th>
+                        <th>學員姓名</th>
+                        <th>課程名稱</th>
+                        <th>報名時間</th>
+                        <th>金額</th>
+                        <th>狀態</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>#R20240715001</td>
+                        <td>王小明</td>
+                        <td>兒童游泳密集班 - 第1梯次</td>
+                        <td>2024-07-15 14:30</td>
+                        <td>NT$ 2,880</td>
+                        <td><span class="status-badge status-active">已付款</span></td>
+                        <td><button class="btn btn-secondary" style="padding: 4px 8px; font-size: 12px;">查看</button></td>
+                    </tr>
+                    <tr>
+                        <td>#R20240715002</td>
+                        <td>林曉華</td>
+                        <td>週三美術課後班</td>
+                        <td>2024-07-15 13:45</td>
+                        <td>NT$ 4,500</td>
+                        <td><span class="status-badge status-active">已付款</span></td>
+                        <td><button class="btn btn-secondary" style="padding: 4px 8px; font-size: 12px;">查看</button></td>
+                    </tr>
+                    <tr>
+                        <td>#R20240715003</td>
+                        <td>張大偉</td>
+                        <td>羽球基礎訓練</td>
+                        <td>2024-07-15 11:20</td>
+                        <td>NT$ 3,200</td>
+                        <td><span class="status-badge status-pending">待付款</span></td>
+                        <td><button class="btn btn-secondary" style="padding: 4px 8px; font-size: 12px;">通知</button></td>
+                    </tr>
+                    <tr>
+                        <td>#R20240714001</td>
+                        <td>陳美玲</td>
+                        <td>科學探索夏令營</td>
+                        <td>2024-07-14 16:10</td>
+                        <td>NT$ 8,800</td>
+                        <td><span class="status-badge status-active">已付款</span></td>
+                        <td><button class="btn btn-secondary" style="padding: 4px 8px; font-size: 12px;">查看</button></td>
+                    </tr>
+                    <tr>
+                        <td>#R20240714002</td>
+                        <td>黃志強</td>
+                        <td>瑜伽入門體驗課</td>
+                        <td>2024-07-14 10:15</td>
+                        <td>NT$ 500</td>
+                        <td><span class="status-badge status-inactive">已取消</span></td>
+                        <td><button class="btn btn-secondary" style="padding: 4px 8px; font-size: 12px;">查看</button></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    
+    <script>
+        // 導航功能
+        function loadDashboard() {
+            setActiveNav('dashboard');
+            document.getElementById('main-content').innerHTML = `
+                <div class="page-header">
+                    <h1 class="page-title">數據總覽</h1>
+                    <p class="page-subtitle">系統即時數據監控</p>
+                </div>
+                <p>這裡是儀表板內容...</p>
+            `;
+        }
+        
+        function loadCourseTypes() {
+            setActiveNav('course-types');
+            window.location.href = 'course-types/manager.html';
+        }
+        
+        function loadSeriesManager() {
+            setActiveNav('series-manager');
+            window.location.href = 'series-manager/create-batch.html';
+        }
+        
+        function loadMembers() {
+            setActiveNav('members');
+            document.getElementById('main-content').innerHTML = `
+                <div class="page-header">
+                    <h1 class="page-title">會員管理</h1>
+                    <p class="page-subtitle">管理系統所有會員資料</p>
+                </div>
+                <p>這裡是會員管理內容...</p>
+            `;
+        }
+        
+        function loadRegistrations() {
+            setActiveNav('registrations');
+            document.getElementById('main-content').innerHTML = `
+                <div class="page-header">
+                    <h1 class="page-title">報名管理</h1>
+                    <p class="page-subtitle">查看與管理所有課程報名</p>
+                </div>
+                <p>這裡是報名管理內容...</p>
+            `;
+        }
+        
+        function loadLineIntegration() {
+            setActiveNav('line-integration');
+            document.getElementById('main-content').innerHTML = `
+                <div class="page-header">
+                    <h1 class="page-title">Line 整合設定</h1>
+                    <p class="page-subtitle">管理 Line Login 與 Line OA 整合</p>
+                </div>
+                <div class="card" style="max-width: 600px;">
+                    <h3>Line Login 設定</h3>
+                    <p>Channel ID: 請在此輸入你的 Line Channel ID</p>
+                    <p>Channel Secret: 請在此輸入你的 Line Channel Secret</p>
+                    <button class="btn btn-primary" style="margin-top: 20px;">儲存設定</button>
+                </div>
+            `;
+        }
+        
+        function setActiveNav(section) {
+            // 移除所有 active 狀態
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            
+            // 設定當前 active
+            event.currentTarget.classList.add('active');
+        }
+        
+        // 初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            // 設定導航事件
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.addEventListener('click', function() {
+                    setActiveNav(this);
+                });
+            });
+        });
+    </script>
+</body>
+</html>
